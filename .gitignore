@@ -1,0 +1,17 @@
+# Python
+.venv/
+.venv-verify/
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+
+# Secrets / local env
+.env
+
+# Runtime artifacts
+tmp/
+logs/
+
+# OS
+.DS_Store

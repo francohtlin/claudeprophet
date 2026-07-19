@@ -1,0 +1,22 @@
+services:
+  - type: web
+    name: codex-prophet
+    runtime: docker
+    plan: starter
+    autoDeploy: false
+    healthCheckPath: /health
+    envVars:
+      - key: CODEX_FORECAST_MODEL
+        value: gpt-5.5
+      - key: CODEX_FORECAST_SANDBOX
+        value: workspace-write
+      - key: CODEX_API_TIMEOUT
+        value: "600"
+      - key: PA_SERVER_URL
+        sync: false
+      - key: PA_SERVER_API_KEY
+        sync: false
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: CODEX_ACCESS_TOKEN
+        sync: false

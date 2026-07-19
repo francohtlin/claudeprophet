@@ -1,0 +1,275 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ClaudeProphet</title>
+  <style>
+    :root {
+      --ink: #151514;
+      --muted: #5d5a55;
+      --paper: #f6f1e8;
+      --line: rgba(21, 21, 20, 0.18);
+      --green: #0b6f59;
+      --blue: #154d8b;
+      --red: #b13b2e;
+      --gold: #d5a23d;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      color: var(--ink);
+      font-family: Georgia, "Iowan Old Style", "Palatino Linotype", serif;
+      background:
+        linear-gradient(90deg, rgba(21, 21, 20, 0.045) 1px, transparent 1px),
+        linear-gradient(180deg, rgba(21, 21, 20, 0.045) 1px, transparent 1px),
+        radial-gradient(circle at 18% 22%, rgba(213, 162, 61, 0.28), transparent 31%),
+        radial-gradient(circle at 84% 16%, rgba(21, 77, 139, 0.18), transparent 34%),
+        var(--paper);
+      background-size: 40px 40px, 40px 40px, auto, auto, auto;
+    }
+
+    main {
+      width: min(1120px, calc(100vw - 40px));
+      min-height: 100vh;
+      margin: 0 auto;
+      display: grid;
+      align-items: center;
+      padding: 48px 0;
+    }
+
+    .sheet {
+      position: relative;
+      display: grid;
+      grid-template-columns: minmax(0, 1.15fr) minmax(280px, 0.85fr);
+      gap: 36px;
+      padding: clamp(28px, 5vw, 64px);
+      border: 1px solid var(--line);
+      background: rgba(246, 241, 232, 0.82);
+      box-shadow: 0 24px 70px rgba(43, 39, 32, 0.16);
+      overflow: hidden;
+    }
+
+    .sheet:before {
+      content: "";
+      position: absolute;
+      inset: 18px;
+      border: 1px solid rgba(21, 21, 20, 0.11);
+      pointer-events: none;
+    }
+
+    .kicker {
+      display: inline-flex;
+      gap: 10px;
+      align-items: center;
+      width: fit-content;
+      margin-bottom: 24px;
+      padding: 8px 12px;
+      border: 1px solid var(--line);
+      color: var(--muted);
+      font: 700 12px/1.1 ui-monospace, "SFMono-Regular", Menlo, monospace;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      background: rgba(255, 255, 255, 0.34);
+    }
+
+    .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 999px;
+      background: var(--green);
+      box-shadow: 0 0 0 5px rgba(11, 111, 89, 0.12);
+    }
+
+    h1 {
+      max-width: 820px;
+      margin: 0;
+      font-size: clamp(54px, 10vw, 132px);
+      line-height: 0.86;
+      letter-spacing: 0;
+      font-weight: 700;
+    }
+
+    .lede {
+      max-width: 650px;
+      margin: 28px 0 0;
+      color: #34322f;
+      font-size: clamp(20px, 2.4vw, 31px);
+      line-height: 1.2;
+    }
+
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-top: 34px;
+    }
+
+    a.button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 48px;
+      padding: 14px 18px;
+      border: 1px solid var(--ink);
+      color: #fff;
+      background: var(--ink);
+      text-decoration: none;
+      font: 800 13px/1 ui-monospace, "SFMono-Regular", Menlo, monospace;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      transition: transform 160ms ease, background 160ms ease;
+    }
+
+    a.button:hover {
+      transform: translateY(-2px);
+      background: var(--blue);
+    }
+
+    .secondary {
+      color: var(--ink);
+      background: transparent;
+    }
+
+    a.secondary:hover {
+      color: #fff;
+      background: var(--green);
+    }
+
+    .panel {
+      align-self: end;
+      border-left: 3px solid var(--ink);
+      padding-left: 24px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .panel h2 {
+      margin: 0 0 18px;
+      font: 800 13px/1 ui-monospace, "SFMono-Regular", Menlo, monospace;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    .row {
+      padding: 18px 0;
+      border-top: 1px solid var(--line);
+    }
+
+    .row:first-of-type {
+      border-top: 0;
+      padding-top: 0;
+    }
+
+    .label {
+      display: block;
+      margin-bottom: 7px;
+      color: var(--muted);
+      font: 800 11px/1 ui-monospace, "SFMono-Regular", Menlo, monospace;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    .value {
+      margin: 0;
+      font-size: 20px;
+      line-height: 1.25;
+    }
+
+    code {
+      font: 700 0.92em ui-monospace, "SFMono-Regular", Menlo, monospace;
+      color: var(--red);
+    }
+
+    .stamp {
+      position: absolute;
+      right: clamp(18px, 4vw, 46px);
+      top: clamp(18px, 4vw, 46px);
+      width: 112px;
+      height: 112px;
+      border: 2px solid var(--red);
+      color: var(--red);
+      display: grid;
+      place-items: center;
+      transform: rotate(9deg);
+      font: 900 14px/1.05 ui-monospace, "SFMono-Regular", Menlo, monospace;
+      text-align: center;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      border-radius: 999px;
+      opacity: 0.72;
+    }
+
+    @media (max-width: 780px) {
+      main {
+        width: min(100vw - 24px, 640px);
+        padding: 20px 0;
+      }
+
+      .sheet {
+        grid-template-columns: 1fr;
+        gap: 34px;
+        padding: 28px;
+      }
+
+      .sheet:before {
+        inset: 10px;
+      }
+
+      .stamp {
+        position: static;
+        margin: 0 0 22px auto;
+        width: 88px;
+        height: 88px;
+        font-size: 11px;
+      }
+
+      .panel {
+        border-left: 0;
+        border-top: 3px solid var(--ink);
+        padding: 24px 0 0;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <section class="sheet" aria-labelledby="title">
+      <div>
+        <div class="stamp">Live<br>Predict<br>API</div>
+        <div class="kicker"><span class="dot"></span> ClaudeProphet endpoint</div>
+        <h1 id="title">Forecasting by Claude.</h1>
+        <p class="lede">
+          This service receives Prophet Hacks event payloads at <code>/predict</code>,
+          launches a Claude forecasting loop with local market, sports, finance, and
+          validation tools, then returns a scored probability distribution.
+        </p>
+        <div class="actions">
+          <a class="button" href="https://github.com/Hilo-Hilo/CodexProphet">Open GitHub</a>
+          <a class="button secondary" href="/health">Check Health</a>
+        </div>
+      </div>
+      <aside class="panel" aria-label="Service details">
+        <h2>How It Works</h2>
+        <div class="row">
+          <span class="label">Input</span>
+          <p class="value">One event JSON object from the evaluator.</p>
+        </div>
+        <div class="row">
+          <span class="label">Agent</span>
+          <p class="value">Claude uses repo instructions, forecasting skills, and lookup tools.</p>
+        </div>
+        <div class="row">
+          <span class="label">Output</span>
+          <p class="value">A strict probability distribution over the event outcomes.</p>
+        </div>
+      </aside>
+    </section>
+  </main>
+</body>
+</html>

@@ -1,0 +1,33 @@
+{
+  "name": "claude-prophet",
+  "version": "0.1.0",
+  "private": true,
+  "license": "CC-BY-4.0",
+  "description": "Claude-native Prophet Hacks forecasting harness with local market, sports, finance, Kalshi, and validation tools.",
+  "scripts": {
+    "claude:prophet": "scripts/launch_goal.sh",
+    "claude:prophet:exec": "scripts/run_goal_exec.sh",
+    "serve": ".venv/bin/python -m api_service --host 127.0.0.1 --port 8080",
+    "serve:lan": ".venv/bin/python -m api_service --host 0.0.0.0 --port 8080",
+    "serve:standard": "scripts/run_standardized_agent.sh",
+    "setup": "python3 -m venv .venv && .venv/bin/python -m pip install --upgrade pip && .venv/bin/python -m pip install -r requirements.txt",
+    "market:lookup": ".venv/bin/python -m market_lookup",
+    "kalshi:discover": ".venv/bin/python -m kalshi_discovery",
+    "sports:lookup": ".venv/bin/python -m sports_lookup",
+    "sports:self-test": ".venv/bin/python -m sports_lookup --self-test",
+    "finance:lookup": ".venv/bin/python -m finance_lookup",
+    "finance:self-test": ".venv/bin/python -m finance_lookup --self-test",
+    "issue:tool-failure": "scripts/report_tool_failure_issue.sh",
+    "metadata": ".venv/bin/python -m api_service.run_metadata",
+    "submit:prediction": ".venv/bin/python -m submit_prediction",
+    "sample:retrieve:sports": "mkdir -p sample_events && .venv/bin/prophet forecast retrieve --dataset sample-sports -o sample_events/sample-sports.json",
+    "sample:retrieve:entertainment": "mkdir -p sample_events && .venv/bin/prophet forecast retrieve --dataset sample-entertainment -o sample_events/sample-entertainment.json",
+    "sample:retrieve:economics": "mkdir -p sample_events && .venv/bin/prophet forecast retrieve --dataset sample-economics -o sample_events/sample-economics.json",
+    "sample:retrieve:resolved": "mkdir -p sample_events && .venv/bin/prophet forecast retrieve --dataset sample-resolved --include-resolved -o sample_events/sample-resolved.json",
+    "sample:actuals:resolved": ".venv/bin/python -m sample_tools.build_actuals sample_events/sample-resolved.json sample_events/sample-resolved-actuals.json",
+    "prophet:events": "curl -s 'http://127.0.0.1:8080/prophet/events?status=open'",
+    "prophet:leaderboard": "curl -s 'http://127.0.0.1:8080/prophet/leaderboard'",
+    "test:tools": ".venv/bin/python -m unittest tests/test_kalshi_discovery.py tests/test_sports_lookup.py tests/test_finance_lookup.py tests/test_market_lookup.py && .venv/bin/python -m pytest tests/test_submit_prediction.py tests/test_api_service_fallback.py tests/test_run_metadata.py tests/test_forecast_launcher.py tests/test_openrouter_fallback.py tests/test_openclaw_observer.py",
+    "check": "command -v claude >/dev/null 2>&1 || { echo 'claude CLI not found. Install with: npm install -g @anthropic-ai/claude-code'; exit 1; } && .venv/bin/python -m unittest tests/test_kalshi_discovery.py tests/test_sports_lookup.py tests/test_finance_lookup.py tests/test_market_lookup.py && .venv/bin/python -m pytest tests/test_submit_prediction.py tests/test_api_service_fallback.py tests/test_run_metadata.py tests/test_forecast_launcher.py tests/test_openrouter_fallback.py tests/test_openclaw_observer.py"
+  }
+}

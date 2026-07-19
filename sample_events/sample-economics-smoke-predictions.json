@@ -1,0 +1,43 @@
+{
+  "timestamp": "2026-05-17T00:30:07.583940Z",
+  "predictions": [
+    {
+      "market_ticker": "KXHOUSINGSTART-26MAY21",
+      "probabilities": [
+        {
+          "market": "Above 1.400M",
+          "probability": 0.65
+        },
+        {
+          "market": "Above 1.425M",
+          "probability": 0.2
+        },
+        {
+          "market": "Above 1.450M",
+          "probability": 0.08
+        },
+        {
+          "market": "Above 1.475M",
+          "probability": 0.04
+        },
+        {
+          "market": "Above 1.500M",
+          "probability": 0.02
+        },
+        {
+          "market": "Above 1.525M",
+          "probability": 0.005
+        },
+        {
+          "market": "Above 1.550M",
+          "probability": 0.003
+        },
+        {
+          "market": "Above 1.575M",
+          "probability": 0.002
+        }
+      ],
+      "rationale": "No directly relevant market prices or recent housing starts data available. Based on historical US housing starts (typically 1.3-1.6M range in recent years) and moderate economic conditions in early 2026, the probability of exceeding 1.400M is moderately high (~65%). Higher thresholds become increasingly unlikely due to typical monthly volatility and trend. Probabilities sum to 1.0."
+    }
+  ]
+}

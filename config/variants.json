@@ -1,0 +1,21 @@
+{
+  "active_variant": "v1_market_prior_claude",
+  "variants": {
+    "v1_market_prior_claude": {
+      "description": "Claude agent with market lookup, native web search, checkpoint fallback, evidence manifest, request trace logging, and current AGENTS.md market-prior policy.",
+      "prompt_version": "agents_2026_05_18",
+      "model": "claude-opus-4-8",
+      "calibration_policy": "market_signal_learnings_2026_05_17",
+      "output_policy": "validator_checkpoint_with_top_k_support",
+      "tools_enabled": [
+        "market_lookup",
+        "kalshi_discovery",
+        "sports_lookup",
+        "finance_lookup",
+        "native_web_search",
+        "submit_prediction"
+      ],
+      "notes": "Live Prophet Hacks forecasting variant. Do not treat market-signal learnings as universal curve fitting; apply only when named conditions match."
+    }
+  }
+}

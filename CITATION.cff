@@ -1,0 +1,17 @@
+cff-version: 1.2.0
+title: "CodexProphet: A Codex-native forecasting harness"
+message: >-
+  If you use this software, its data, its findings, or any material
+  derived from it, please cite it using the metadata below.
+type: software
+authors:
+  - family-names: Wen
+    given-names: Hanson
+    email: hansonwen@berkeley.edu
+  - family-names: Gui
+    given-names: James
+    email: jamesgui@usc.edu
+repository-code: "https://github.com/Hilo-Hilo/CodexProphet"
+url: "https://github.com/Hilo-Hilo/CodexProphet"
+license: CC-BY-4.0
+year: 2026

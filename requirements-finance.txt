@@ -1,0 +1,7 @@
+yfinance
+ccxt
+fredapi
+finnhub-python
+alpha_vantage
+sec-edgar-downloader
+openbb

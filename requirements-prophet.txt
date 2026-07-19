@@ -1,0 +1,2 @@
+ai-prophet-core @ git+https://github.com/ai-prophet/ai-prophet.git#subdirectory=packages/core
+ai-prophet @ git+https://github.com/ai-prophet/ai-prophet.git#subdirectory=packages/cli
