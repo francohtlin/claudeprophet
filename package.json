@@ -17,6 +17,7 @@
     "sports:self-test": ".venv/bin/python -m sports_lookup --self-test",
     "finance:lookup": ".venv/bin/python -m finance_lookup",
     "finance:self-test": ".venv/bin/python -m finance_lookup --self-test",
+    "fundamentals:lookup": ".venv/bin/python -m company_fundamentals",
     "issue:tool-failure": "scripts/report_tool_failure_issue.sh",
     "metadata": ".venv/bin/python -m api_service.run_metadata",
     "submit:prediction": ".venv/bin/python -m submit_prediction",
@@ -27,7 +28,7 @@
     "sample:actuals:resolved": ".venv/bin/python -m sample_tools.build_actuals sample_events/sample-resolved.json sample_events/sample-resolved-actuals.json",
     "prophet:events": "curl -s 'http://127.0.0.1:8080/prophet/events?status=open'",
     "prophet:leaderboard": "curl -s 'http://127.0.0.1:8080/prophet/leaderboard'",
-    "test:tools": ".venv/bin/python -m unittest tests/test_kalshi_discovery.py tests/test_sports_lookup.py tests/test_finance_lookup.py tests/test_market_lookup.py && .venv/bin/python -m pytest tests/test_submit_prediction.py tests/test_api_service_fallback.py tests/test_run_metadata.py tests/test_forecast_launcher.py tests/test_openrouter_fallback.py tests/test_openclaw_observer.py",
-    "check": "command -v claude >/dev/null 2>&1 || { echo 'claude CLI not found. Install with: npm install -g @anthropic-ai/claude-code'; exit 1; } && .venv/bin/python -m unittest tests/test_kalshi_discovery.py tests/test_sports_lookup.py tests/test_finance_lookup.py tests/test_market_lookup.py && .venv/bin/python -m pytest tests/test_submit_prediction.py tests/test_api_service_fallback.py tests/test_run_metadata.py tests/test_forecast_launcher.py tests/test_openrouter_fallback.py tests/test_openclaw_observer.py"
+    "test:tools": ".venv/bin/python -m unittest tests/test_kalshi_discovery.py tests/test_sports_lookup.py tests/test_finance_lookup.py tests/test_market_lookup.py tests/test_company_fundamentals.py && .venv/bin/python -m pytest tests/test_submit_prediction.py tests/test_api_service_fallback.py tests/test_run_metadata.py tests/test_forecast_launcher.py tests/test_openrouter_fallback.py tests/test_openclaw_observer.py",
+    "check": "command -v claude >/dev/null 2>&1 || { echo 'claude CLI not found. Install with: npm install -g @anthropic-ai/claude-code'; exit 1; } && .venv/bin/python -m unittest tests/test_kalshi_discovery.py tests/test_sports_lookup.py tests/test_finance_lookup.py tests/test_market_lookup.py tests/test_company_fundamentals.py && .venv/bin/python -m pytest tests/test_submit_prediction.py tests/test_api_service_fallback.py tests/test_run_metadata.py tests/test_forecast_launcher.py tests/test_openrouter_fallback.py tests/test_openclaw_observer.py"
   }
 }

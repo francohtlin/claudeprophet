@@ -78,6 +78,11 @@ infrastructure inside a live forecast before preserving a valid checkpoint.
   starters, and sport-specific rules.
 - `finance:lookup`: prices, history, macro series, filings, company/crypto
   context; use official calendars/sources for exact resolution definitions.
+- `fundamentals:lookup`: for company-KPI / corporate-event Kalshi markets
+  (revenue, earnings, EPS, guidance, deliveries, M&A, etc.). Finds the matching
+  open markets, resolves the issuer ticker, and attaches its fundamentals in one
+  JSON blob. Pass `--symbols` when you know the ticker; otherwise verify
+  `resolved_symbols` in the output before trusting the fundamentals.
 - Built-in WebSearch: current news, official sources, rulebooks, filings, polls,
   injuries, lineups, and cross-checks.
 - AnySearch: optional recall/URL extraction; treat as evidence discovery, not
@@ -185,6 +190,7 @@ npm run market:lookup -- --text "..." --max-markets 10 --include-history --histo
 npm run kalshi:discover -- --query "..." --status open --max-pages 5 --include-orderbook --orderbook-depth 10
 npm run sports:lookup -- --query "..." --sport auto --days 14 --include-odds
 npm run finance:lookup -- --query "..." --symbols BTC --asset-type crypto --data-needed price,history,news,macro,filings
+npm run fundamentals:lookup -- --query "nvidia revenue" --symbols NVDA --status open
 python3 ~/.claude/skills/anysearch/scripts/anysearch_cli.py search "..." --max_results 5
 npm run submit:prediction -- --event event.json --prediction prediction.json
 npm run submit:prediction -- --kind initial --event event.json --prediction prediction.json

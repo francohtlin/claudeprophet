@@ -11,6 +11,7 @@ Key local tools (run via Bash from the repo root):
 - `npm run kalshi:discover -- --query "..." --status open`
 - `npm run sports:lookup -- --query "..." --include-odds`
 - `npm run finance:lookup -- --query "..." --symbols NVDA`
+- `npm run fundamentals:lookup -- --query "nvidia revenue" --symbols NVDA` (company-KPI Kalshi markets + issuer fundamentals)
 - `npm run submit:prediction -- --kind initial|final --event <event.json> --prediction <prediction.json>`
 - `npm run metadata -- evidence|trace --workspace <dir> ...`
 

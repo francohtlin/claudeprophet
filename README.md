@@ -236,6 +236,7 @@ npm run market:lookup -- --text "..." --include-history --history-lookback-days 
 npm run kalshi:discover -- --query "..." --status open --max-markets 100
 npm run sports:lookup -- --query "..." --sport auto --include-odds
 npm run finance:lookup -- --query "..." --symbols NVDA --asset-type equity
+npm run fundamentals:lookup -- --query "nvidia revenue" --symbols NVDA --status open
 npm run metadata -- evidence --workspace tmp/api/<request_id> --kind web --source native_web_search --query "..." --notes "..."
 npm run metadata -- trace --workspace tmp/api/<request_id> --stage agent_research_complete --message "..."
 npm run submit:prediction -- --event event.json --prediction prediction.json
