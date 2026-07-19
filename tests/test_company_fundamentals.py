@@ -7,8 +7,12 @@ from company_fundamentals.fundamentals import (
     filter_kpi_markets,
     is_kpi_market,
     market_kpi_signals,
+    parse_categories,
     parse_symbols,
+    query_terms,
     resolve_symbols,
+    series_matches,
+    symbols_from_series,
 )
 
 
@@ -58,6 +62,35 @@ class CompanyFundamentalsTests(unittest.TestCase):
 
     def test_parse_symbols_normalizes_and_dedupes(self) -> None:
         self.assertEqual(parse_symbols("nvda, AAPL nvda"), ["NVDA", "AAPL"])
+
+    def test_query_terms_drops_stopwords(self) -> None:
+        self.assertEqual(query_terms("Will Nvidia report revenue in Q3"), ["nvidia", "revenue"])
+
+    def test_series_matches_by_term_or_symbol(self) -> None:
+        series = {"ticker": "KXPLTR", "title": "Palantir Technologies quarterly customers"}
+        self.assertTrue(series_matches(series, ["palantir"], []))
+        self.assertTrue(series_matches(series, [], ["PLTR"]))
+        self.assertFalse(series_matches(series, ["tesla"], ["TSLA"]))
+
+    def test_series_matches_requires_a_filter(self) -> None:
+        self.assertFalse(series_matches({"ticker": "KXPLTR", "title": "Palantir"}, [], []))
+
+    def test_symbols_from_series_uses_title_alias(self) -> None:
+        series = [
+            {"ticker": "KXMETA", "title": "Meta Platforms headcount"},
+            {"ticker": "KXHOOD", "title": "Robinhood funded customers"},
+        ]
+        self.assertEqual(symbols_from_series(series), ["META", "HOOD"])
+
+    def test_resolve_falls_back_to_series_titles(self) -> None:
+        resolved = resolve_symbols(
+            [], query="", markets=[], series_list=[{"ticker": "KXHOOD", "title": "Robinhood funded customers"}]
+        )
+        self.assertEqual(resolved, ["HOOD"])
+
+    def test_parse_categories_defaults(self) -> None:
+        self.assertEqual(parse_categories(""), ["Companies", "Financials"])
+        self.assertEqual(parse_categories("Companies, Crypto"), ["Companies", "Crypto"])
 
 
 if __name__ == "__main__":
