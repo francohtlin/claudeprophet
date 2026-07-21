@@ -255,6 +255,29 @@ public trade prints and price/volume candles.
 Claude also has its normal shell/file/search tools and the built-in WebSearch
 tool.
 
+## Backtesting & live KPI forecasting
+
+Beyond the live agent, the repo includes an evaluation + forecasting layer
+(merged in from the former `claudeprophet-backtest` repo). It is deliberately
+**stdlib-only** so it runs without the engine's heavy dependency stack.
+
+- `backtest/` — walk-forward backtester for resolved Kalshi markets (Brier, log
+  loss, calibration) with pluggable forecasters (`base_rate`, `market`, and a
+  `claudeprophet` agent adapter). Run: `python3 -m backtest --series KXCPIYOY,KXPAYROLLS`.
+- `forecasting/` — the company-KPI live pipeline:
+  - `pull_kpi_markets.py` — pull all open KPI markets → `data/company_kpi_open.jsonl`
+  - `select_kpi.py -n 30` — pick the next uncertain, most-liquid metrics
+  - `forecast_kpi.py` — forecast each latent metric with Claude (subscription,
+    live web research) → `data/forecasts/open_kpi_claudeprophet.jsonl`
+  - `kpi_metrics.py` — shared parsing/grouping used across the pipeline + dashboard
+- `dashboard/gen_dashboard.py` — render `docs/index.html`, a self-contained
+  dashboard of open KPI markets + ClaudeProphet forecasts + edge vs market. It is
+  served via GitHub Pages from `docs/`.
+- `data/` — tracked market pulls and forecast outputs.
+
+These markets are unresolved, so forecasting them is a genuine live prediction
+(no lookahead); the backtester scores forecasts against outcomes as they resolve.
+
 ## Deployment (legacy, not converted)
 
 The production deploy scaffolding — `scripts/deploy_mac_mini.sh`,
