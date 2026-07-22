@@ -249,7 +249,7 @@ tbody td{padding:10px 12px;border-bottom:1px solid var(--border);vertical-align:
     <label class="chk"><input type="checkbox" id="fo"> Forecasted only</label>
     <span class="count" id="cnt"></span>
   </div>
-  <div class="tblwrap"><table>
+  <div class="tblwrap"><table id="ftable">
     <thead><tr>
       <th data-k="co">Company <span class="ar">&#8597;</span></th>
       <th data-k="metric">Metric <span class="ar">&#8597;</span></th>
@@ -402,10 +402,11 @@ function view(){
     tr.classList.add('open');const det=document.createElement('tr');det.className='detail';
     det.innerHTML=`<td colspan="6">${detailHTML(DATA[tr.dataset.i])}</td>`;tr.after(det);};});
 }
-document.querySelectorAll('thead th').forEach(th=>{th.onclick=()=>{const k=th.dataset.k;
+document.querySelectorAll('#ftable thead th').forEach(th=>{th.onclick=()=>{const k=th.dataset.k;
+  if(!k)return;
   if(k===sortK)sortDir*=-1;else{sortK=k;sortDir=1;}
-  document.querySelectorAll('thead th').forEach(t=>{t.classList.remove('sorted');t.querySelector('.ar').innerHTML='&#8597;';});
-  th.classList.add('sorted');th.querySelector('.ar').innerHTML=sortDir>0?'&#8593;':'&#8595;';view();};});
+  document.querySelectorAll('#ftable thead th').forEach(t=>{t.classList.remove('sorted');const a=t.querySelector('.ar');if(a)a.innerHTML='&#8597;';});
+  th.classList.add('sorted');const a=th.querySelector('.ar');if(a)a.innerHTML=sortDir>0?'&#8593;':'&#8595;';view();};});
 q.oninput=view;mo.onchange=view;lv.onchange=view;fo.onchange=view;view();
 </script>"""
 
