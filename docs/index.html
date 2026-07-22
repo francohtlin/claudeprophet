@@ -297,4 +297,23 @@ document.querySelectorAll('#ftable thead th').forEach(th=>{th.onclick=()=>{const
   document.querySelectorAll('#ftable thead th').forEach(t=>{t.classList.remove('sorted');const a=t.querySelector('.ar');if(a)a.innerHTML='&#8597;';});
   th.classList.add('sorted');const a=th.querySelector('.ar');if(a)a.innerHTML=sortDir>0?'&#8593;':'&#8595;';view();};});
 q.oninput=view;mo.onchange=view;lv.onchange=view;fo.onchange=view;view();
+
+// Make the portfolio / backtest / track-record tables sortable too (DOM sort,
+// numeric-aware). The main forecasts table (#ftable) keeps its own data sort above.
+function makeSortable(table){
+  const ths=[...table.querySelectorAll('thead th')]; const dirs=ths.map(()=>1);
+  const num=s=>{const m=s.replace(/[,$%]/g,'').match(/-?\\d+\\.?\\d*/);return m?parseFloat(m[0]):null;};
+  ths.forEach((th,i)=>{ th.style.cursor='pointer';
+    th.addEventListener('click',()=>{
+      const tb=table.querySelector('tbody'); const rows=[...tb.querySelectorAll('tr')];
+      rows.sort((a,b)=>{ const x=(a.children[i]||{}).textContent||'', y=(b.children[i]||{}).textContent||'';
+        const nx=num(x), ny=num(y);
+        return ((nx!=null&&ny!=null)?nx-ny:x.trim().localeCompare(y.trim()))*dirs[i]; });
+      dirs[i]*=-1; rows.forEach(r=>tb.appendChild(r));
+      ths.forEach(t=>t.classList.remove('sorted')); th.classList.add('sorted');
+    });
+  });
+}
+['portbody','btbody','trackbody'].forEach(id=>{ const tb=document.getElementById(id);
+  if(tb&&tb.children.length){const t=tb.closest('table'); if(t)makeSortable(t);} });
 </script>
