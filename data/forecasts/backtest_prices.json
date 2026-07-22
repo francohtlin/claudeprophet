@@ -1,0 +1,1438 @@
+{
+ "KXUAL-26APRPAX-46000000.0": {
+  "pre_yes": 0.08,
+  "trade_ts": "2026-04-17T19:39:40+00:00"
+ },
+ "KXUAL-26APRPAX-45500000.0": {
+  "pre_yes": 0.08,
+  "trade_ts": "2026-04-20T16:18:50+00:00"
+ },
+ "KXUAL-26APRPAX-45000000.0": {
+  "pre_yes": 0.06,
+  "trade_ts": "2026-04-20T20:42:19+00:00"
+ },
+ "KXUAL-26APRPAX-44500000.0": {
+  "pre_yes": 0.1,
+  "trade_ts": "2026-04-20T16:18:32+00:00"
+ },
+ "KXUAL-26APRPAX-44000000.0": {
+  "pre_yes": 0.13,
+  "trade_ts": "2026-04-20T19:03:38+00:00"
+ },
+ "KXUAL-26APRPAX-43500000.0": {
+  "pre_yes": 0.16,
+  "trade_ts": "2026-04-20T16:25:33+00:00"
+ },
+ "KXUAL-26APRPAX-43000000.0": {
+  "pre_yes": 0.23,
+  "trade_ts": "2026-04-20T14:37:28+00:00"
+ },
+ "KXUAL-26APRPAX-42500000.0": {
+  "pre_yes": 0.51,
+  "trade_ts": "2026-04-20T19:13:23+00:00"
+ },
+ "KXUAL-26APRPAX-42000000.0": {
+  "pre_yes": 0.75,
+  "trade_ts": "2026-04-20T20:16:50+00:00"
+ },
+ "KXUAL-26APRPAX-41500000.0": {
+  "pre_yes": 0.81,
+  "trade_ts": "2026-04-20T19:46:22+00:00"
+ },
+ "KXUAL-26APRPAX-41000000.0": {
+  "pre_yes": 0.92,
+  "trade_ts": "2026-04-20T20:09:42+00:00"
+ },
+ "KXPM-26APRZYNSHIP-185": {
+  "pre_yes": 0.66,
+  "trade_ts": "2026-04-21T13:52:15+00:00"
+ },
+ "KXPM-26APRZYNSHIP-190": {
+  "pre_yes": 0.41,
+  "trade_ts": "2026-04-21T13:46:16+00:00"
+ },
+ "KXPM-26APRZYNSHIP-195000000": {
+  "pre_yes": 0.39,
+  "trade_ts": "2026-04-21T13:43:42+00:00"
+ },
+ "KXPM-26APRZYNSHIP-200000000": {
+  "pre_yes": 0.23,
+  "trade_ts": "2026-04-21T11:08:09+00:00"
+ },
+ "KXPM-26APRZYNSHIP-205000000": {
+  "pre_yes": 0.12,
+  "trade_ts": "2026-04-21T06:25:49+00:00"
+ },
+ "KXPM-26APRZYNSHIP-210000000": {
+  "pre_yes": 0.08,
+  "trade_ts": "2026-04-21T03:46:30+00:00"
+ },
+ "KXPM-26APRZYNSHIP-215000000": {
+  "pre_yes": 0.07,
+  "trade_ts": "2026-04-21T06:05:04+00:00"
+ },
+ "KXPM-26APRZYNSHIP-220000000": {
+  "pre_yes": 0.04,
+  "trade_ts": "2026-04-21T00:36:04+00:00"
+ },
+ "KXPM-26APRZYNSHIP-225000000": {
+  "pre_yes": 0.01,
+  "trade_ts": "2026-04-20T16:35:33+00:00"
+ },
+ "KXPM-26APRZYNSHIP-235000000": {
+  "pre_yes": 0.03,
+  "trade_ts": "2026-04-18T16:47:04+00:00"
+ },
+ "KXPM-26APRZYNSHIP-230000000": {
+  "pre_yes": 0.06,
+  "trade_ts": "2026-04-14T18:23:04+00:00"
+ },
+ "KXLUV-26APRFARE-213": {
+  "pre_yes": 0.26,
+  "trade_ts": "2026-04-19T21:42:54+00:00"
+ },
+ "KXLUV-26APRFARE-210": {
+  "pre_yes": 0.54,
+  "trade_ts": "2026-04-21T20:04:12+00:00"
+ },
+ "KXLUV-26APRFARE-207": {
+  "pre_yes": 0.61,
+  "trade_ts": "2026-04-21T03:19:26+00:00"
+ },
+ "KXLUV-26APRFARE-204": {
+  "pre_yes": 0.85,
+  "trade_ts": "2026-04-19T17:29:10+00:00"
+ },
+ "KXLUV-26APRFARE-198": {
+  "pre_yes": 0.98,
+  "trade_ts": "2026-04-20T03:52:00+00:00"
+ },
+ "KXLUV-26APRFARE-195": {
+  "pre_yes": 0.99,
+  "trade_ts": "2026-04-20T06:12:51+00:00"
+ },
+ "KXLUV-26APRSEATS-58000000": {
+  "pre_yes": 0.1,
+  "trade_ts": "2026-04-16T23:37:35+00:00"
+ },
+ "KXLUV-26APRSEATS-57000000": {
+  "pre_yes": 0.05,
+  "trade_ts": "2026-04-17T00:39:33+00:00"
+ },
+ "KXHOOD-26APRGOLDSUBS-4200000": {
+  "pre_yes": 0.98,
+  "trade_ts": "2026-04-27T23:53:21+00:00"
+ },
+ "KXHOOD-26APRGOLDSUBS-4400000": {
+  "pre_yes": 0.79,
+  "trade_ts": "2026-04-28T00:14:08+00:00"
+ },
+ "KXHOOD-26APRGOLDSUBS-4500000": {
+  "pre_yes": 0.31,
+  "trade_ts": "2026-04-27T23:04:15+00:00"
+ },
+ "KXHOOD-26APRGOLDSUBS-4600000": {
+  "pre_yes": 0.12,
+  "trade_ts": "2026-04-27T23:49:20+00:00"
+ },
+ "KXHOOD-26APRGOLDSUBS-4800000": {
+  "pre_yes": 0.03,
+  "trade_ts": "2026-04-27T23:20:44+00:00"
+ },
+ "KXHOOD-26APRGOLDSUBS-5000000": {
+  "pre_yes": 0.02,
+  "trade_ts": "2026-04-26T00:47:54+00:00"
+ },
+ "KXHOOD-26APRGOLDSUBS-5200000": {
+  "pre_yes": 0.01,
+  "trade_ts": "2026-04-26T03:34:38+00:00"
+ },
+ "KXCVNA-26APRSALES-185000": {
+  "pre_yes": 0.79,
+  "trade_ts": "2026-04-29T03:35:36+00:00"
+ },
+ "KXCVNA-26APRSALES-180000": {
+  "pre_yes": 0.76,
+  "trade_ts": "2026-04-29T03:24:42+00:00"
+ },
+ "KXCVNA-26APRSALES-175000": {
+  "pre_yes": 0.9,
+  "trade_ts": "2026-04-29T01:06:48+00:00"
+ },
+ "KXCVNA-26APRSALES-170000": {
+  "pre_yes": 0.96,
+  "trade_ts": "2026-04-29T03:24:30+00:00"
+ },
+ "KXCVNA-26APRSALES-165000": {
+  "pre_yes": 0.95,
+  "trade_ts": "2026-04-29T03:24:30+00:00"
+ },
+ "KXCVNA-26APRSALES-160000": {
+  "pre_yes": 0.98,
+  "trade_ts": "2026-04-27T14:57:06+00:00"
+ },
+ "KXCVNA-26APRSALES-155000": {
+  "pre_yes": 0.98,
+  "trade_ts": "2026-04-27T14:56:59+00:00"
+ },
+ "KXWH-26APRROOMS-860000": {
+  "pre_yes": 0.95,
+  "trade_ts": "2026-04-27T15:25:35+00:00"
+ },
+ "KXWH-26APRROOMS-875000": {
+  "pre_yes": 0.1,
+  "trade_ts": "2026-04-29T03:22:31+00:00"
+ },
+ "KXWH-26APRROOMS-920000": {
+  "pre_yes": 0.07,
+  "trade_ts": "2026-04-17T12:11:14+00:00"
+ },
+ "KXWH-26APRROOMS-900000": {
+  "pre_yes": 0.09,
+  "trade_ts": "2026-04-17T10:51:05+00:00"
+ },
+ "KXWH-26APRROOMS-890000": {
+  "pre_yes": 0.06,
+  "trade_ts": "2026-04-26T22:05:42+00:00"
+ },
+ "KXWH-26APRROOMS-880000": {
+  "pre_yes": 0.01,
+  "trade_ts": "2026-04-28T20:12:16+00:00"
+ },
+ "KXWH-26APRROOMS-870000": {
+  "pre_yes": 0.49,
+  "trade_ts": "2026-04-29T03:15:52+00:00"
+ },
+ "KXMO-26APRCIGSHIP-12600000000.0": {
+  "pre_yes": 0.88,
+  "trade_ts": "2026-04-29T18:00:43+00:00"
+ },
+ "KXMO-26APRCIGSHIP-14400000000.0": {
+  "pre_yes": 0.06,
+  "trade_ts": "2026-04-29T17:55:55+00:00"
+ },
+ "KXMO-26APRCIGSHIP-14100000000.0": {
+  "pre_yes": 0.08,
+  "trade_ts": "2026-04-24T03:09:56+00:00"
+ },
+ "KXMO-26APRCIGSHIP-13800000000.0": {
+  "pre_yes": 0.11,
+  "trade_ts": "2026-04-28T01:13:05+00:00"
+ },
+ "KXMO-26APRCIGSHIP-13500000000.0": {
+  "pre_yes": 0.15,
+  "trade_ts": "2026-04-29T18:19:10+00:00"
+ },
+ "KXMO-26APRCIGSHIP-13200000000.0": {
+  "pre_yes": 0.61,
+  "trade_ts": "2026-04-29T16:53:47+00:00"
+ },
+ "KXMO-26APRCIGSHIP-12900000000.0": {
+  "pre_yes": 0.74,
+  "trade_ts": "2026-04-29T18:00:08+00:00"
+ },
+ "KXRDDT-26APRDAU-126000000": {
+  "pre_yes": 0.87,
+  "trade_ts": "2026-04-29T16:14:37+00:00"
+ },
+ "KXRDDT-26APRDAU-124000000": {
+  "pre_yes": 0.88,
+  "trade_ts": "2026-04-28T13:55:41+00:00"
+ },
+ "KXRDDT-26APRDAU-122000000": {
+  "pre_yes": 0.95,
+  "trade_ts": "2026-04-28T12:13:17+00:00"
+ },
+ "KXRDDT-26APRDAU-120000000": {
+  "pre_yes": 0.99,
+  "trade_ts": "2026-04-29T01:48:17+00:00"
+ },
+ "KXRDDT-26APRDAU-129000000": {
+  "pre_yes": 0.18,
+  "trade_ts": "2026-04-29T21:33:27+00:00"
+ },
+ "KXRDDT-26APRDAU-127000000": {
+  "pre_yes": 0.56,
+  "trade_ts": "2026-04-29T23:46:36+00:00"
+ },
+ "KXRDDT-26APRDAU-136000000": {
+  "pre_yes": 0.08,
+  "trade_ts": "2026-04-23T10:03:30+00:00"
+ },
+ "KXRDDT-26APRDAU-134000000": {
+  "pre_yes": 0.04,
+  "trade_ts": "2026-04-28T08:06:03+00:00"
+ },
+ "KXRDDT-26APRDAU-132000000": {
+  "pre_yes": 0.06,
+  "trade_ts": "2026-04-29T12:47:09+00:00"
+ },
+ "KXRDDT-26APRDAU-130000000": {
+  "pre_yes": 0.09,
+  "trade_ts": "2026-04-29T12:47:17+00:00"
+ },
+ "KXRDDT-26APRDAU-128000000": {
+  "pre_yes": 0.45,
+  "trade_ts": "2026-04-29T20:11:44+00:00"
+ },
+ "KXROKU-26APRHOURS-40500000000.0": {
+  "pre_yes": 0.06,
+  "trade_ts": "2026-04-29T22:10:34+00:00"
+ },
+ "KXROKU-26APRHOURS-40000000000.0": {
+  "pre_yes": 0.18,
+  "trade_ts": "2026-04-29T13:00:50+00:00"
+ },
+ "KXROKU-26APRHOURS-39500000000.0": {
+  "pre_yes": 0.44,
+  "trade_ts": "2026-04-30T00:12:34+00:00"
+ },
+ "KXROKU-26APRHOURS-39000000000.0": {
+  "pre_yes": 0.79,
+  "trade_ts": "2026-04-30T00:25:15+00:00"
+ },
+ "KXROKU-26APRHOURS-38500000000.0": {
+  "pre_yes": 0.83,
+  "trade_ts": "2026-04-29T20:01:06+00:00"
+ },
+ "KXROKU-26APRHOURS-38000000000.0": {
+  "pre_yes": 0.89,
+  "trade_ts": "2026-04-29T12:47:50+00:00"
+ },
+ "KXRBLX-26APRHOURS-34500000000": {
+  "pre_yes": 0.13,
+  "trade_ts": "2026-04-30T01:16:41+00:00"
+ },
+ "KXRBLX-26APRHOURS-31500000000": {
+  "pre_yes": 0.47,
+  "trade_ts": "2026-04-29T19:41:01+00:00"
+ },
+ "KXRBLX-26APRHOURS-30000000000.0": {
+  "pre_yes": 0.97,
+  "trade_ts": "2026-04-27T09:00:33+00:00"
+ },
+ "KXRBLX-26APRHOURS-42000000000.0": {
+  "pre_yes": 0.04,
+  "trade_ts": "2026-04-29T04:10:56+00:00"
+ },
+ "KXRBLX-26APRHOURS-39000000000.0": {
+  "pre_yes": 0.04,
+  "trade_ts": "2026-04-28T21:57:32+00:00"
+ },
+ "KXRBLX-26APRHOURS-36000000000.0": {
+  "pre_yes": 0.02,
+  "trade_ts": "2026-04-29T01:50:02+00:00"
+ },
+ "KXRBLX-26APRHOURS-33000000000.0": {
+  "pre_yes": 0.27,
+  "trade_ts": "2026-04-30T01:27:16+00:00"
+ },
+ "KXPSKY-26JULPARSUBS-82000000.0": {
+  "pre_yes": 0.04,
+  "trade_ts": "2026-05-03T01:09:45+00:00"
+ },
+ "KXPSKY-26JULPARSUBS-80000000.0": {
+  "pre_yes": 0.25,
+  "trade_ts": "2026-05-03T06:55:39+00:00"
+ },
+ "KXPSKY-26JULPARSUBS-78000000.0": {
+  "pre_yes": 0.81,
+  "trade_ts": "2026-05-03T02:41:11+00:00"
+ },
+ "KXPSKY-26JULPARSUBS-76000000.0": {
+  "pre_yes": 0.99,
+  "trade_ts": "2026-05-03T01:12:11+00:00"
+ },
+ "KXPSKY-26JULPARSUBS-74000000.0": {
+  "pre_yes": 0.99,
+  "trade_ts": "2026-05-03T01:11:12+00:00"
+ },
+ "KXPSKY-26JULPARSUBS-72000000.0": {
+  "pre_yes": 0.99,
+  "trade_ts": "2026-05-03T01:11:07+00:00"
+ },
+ "KXPSKY-26JULPARSUBS-70000000.0": {
+  "pre_yes": 0.99,
+  "trade_ts": "2026-05-02T17:30:46+00:00"
+ },
+ "KXPLTR-26MAYCUST-980": {
+  "pre_yes": 0.98,
+  "trade_ts": "2026-05-04T00:45:07+00:00"
+ },
+ "KXPLTR-26MAYCUST-960": {
+  "pre_yes": 0.99,
+  "trade_ts": "2026-05-01T04:54:26+00:00"
+ },
+ "KXPLTR-26MAYCUST-1020": {
+  "pre_yes": 0.53,
+  "trade_ts": "2026-05-04T00:17:46+00:00"
+ },
+ "KXPLTR-26MAYCUST-1040": {
+  "pre_yes": 0.19,
+  "trade_ts": "2026-05-04T01:16:07+00:00"
+ },
+ "KXPLTR-26MAYCUST-1060": {
+  "pre_yes": 0.05,
+  "trade_ts": "2026-05-03T18:16:22+00:00"
+ },
+ "KXPLTR-26MAYCUST-1080": {
+  "pre_yes": 0.04,
+  "trade_ts": "2026-05-03T15:30:19+00:00"
+ },
+ "KXPLTR-26MAYCUST-1100": {
+  "pre_yes": 0.03,
+  "trade_ts": "2026-05-03T14:45:05+00:00"
+ },
+ "KXPLTR-26MAYCUST-1120": {
+  "pre_yes": 0.04,
+  "trade_ts": "2026-05-03T05:07:49+00:00"
+ },
+ "KXRACE-26MAYSHIP-3400": {
+  "pre_yes": 0.8,
+  "trade_ts": "2026-05-04T13:49:52+00:00"
+ },
+ "KXRACE-26MAYSHIP-3300": {
+  "pre_yes": 0.85,
+  "trade_ts": "2026-05-04T13:44:30+00:00"
+ },
+ "KXRACE-26MAYSHIP-3500": {
+  "pre_yes": 0.26,
+  "trade_ts": "2026-05-04T17:29:02+00:00"
+ },
+ "KXRACE-26MAYSHIP-3600": {
+  "pre_yes": 0.07,
+  "trade_ts": "2026-05-04T11:04:28+00:00"
+ },
+ "KXRACE-26MAYSHIP-3700": {
+  "pre_yes": 0.02,
+  "trade_ts": "2026-05-04T04:09:09+00:00"
+ },
+ "KXRACE-26MAYSHIP-3800": {
+  "pre_yes": 0.01,
+  "trade_ts": "2026-05-04T04:03:26+00:00"
+ },
+ "KXRACE-26MAYSHIP-3200": {
+  "pre_yes": 0.95,
+  "trade_ts": "2026-05-04T13:42:50+00:00"
+ },
+ "KXMTCH-26MAYPAYERS-13200000": {
+  "pre_yes": 0.97,
+  "trade_ts": "2026-05-04T03:47:09+00:00"
+ },
+ "KXMTCH-26MAYPAYERS-13500000": {
+  "pre_yes": 0.84,
+  "trade_ts": "2026-05-04T13:23:15+00:00"
+ },
+ "KXMTCH-26MAYPAYERS-13800000": {
+  "pre_yes": 0.17,
+  "trade_ts": "2026-05-04T21:07:48+00:00"
+ },
+ "KXMTCH-26MAYPAYERS-15900000": {
+  "pre_yes": 0.03,
+  "trade_ts": "2026-05-02T13:35:18+00:00"
+ },
+ "KXMTCH-26MAYPAYERS-15600000": {
+  "pre_yes": 0.01,
+  "trade_ts": "2026-05-03T21:32:34+00:00"
+ },
+ "KXMTCH-26MAYPAYERS-15300000": {
+  "pre_yes": 0.01,
+  "trade_ts": "2026-05-03T21:32:12+00:00"
+ },
+ "KXMTCH-26MAYPAYERS-15000000": {
+  "pre_yes": 0.01,
+  "trade_ts": "2026-05-03T21:31:59+00:00"
+ },
+ "KXMTCH-26MAYPAYERS-14700000": {
+  "pre_yes": 0.05,
+  "trade_ts": "2026-04-28T13:39:55+00:00"
+ },
+ "KXMTCH-26MAYPAYERS-14400000": {
+  "pre_yes": 0.01,
+  "trade_ts": "2026-05-03T21:22:06+00:00"
+ },
+ "KXMTCH-26MAYPAYERS-14100000": {
+  "pre_yes": 0.01,
+  "trade_ts": "2026-05-04T05:56:47+00:00"
+ },
+ "KXMAR-26MAYROOMS-1820000": {
+  "pre_yes": 0.1,
+  "trade_ts": "2026-05-05T13:52:21+00:00"
+ },
+ "KXMAR-26MAYROOMS-1780000": {
+  "pre_yes": 0.97,
+  "trade_ts": "2026-05-05T14:24:06+00:00"
+ },
+ "KXMAR-26MAYROOMS-1760000": {
+  "pre_yes": 0.99,
+  "trade_ts": "2026-05-04T18:04:08+00:00"
+ },
+ "KXMAR-26MAYROOMS-2040000.0": {
+  "pre_yes": 0.01,
+  "trade_ts": "2026-05-04T16:19:39+00:00"
+ },
+ "KXMAR-26MAYROOMS-2000000.0": {
+  "pre_yes": 0.05,
+  "trade_ts": "2026-05-01T19:47:36+00:00"
+ },
+ "KXMAR-26MAYROOMS-1960000.0": {
+  "pre_yes": 0.01,
+  "trade_ts": "2026-04-29T13:50:49+00:00"
+ },
+ "KXMAR-26MAYROOMS-1920000.0": {
+  "pre_yes": 0.01,
+  "trade_ts": "2026-05-01T19:47:19+00:00"
+ },
+ "KXMAR-26MAYROOMS-1880000.0": {
+  "pre_yes": 0.01,
+  "trade_ts": "2026-05-04T12:44:45+00:00"
+ },
+ "KXMAR-26MAYROOMS-1840000.0": {
+  "pre_yes": 0.03,
+  "trade_ts": "2026-05-04T13:15:08+00:00"
+ },
+ "KXMAR-26MAYROOMS-1800000.0": {
+  "pre_yes": 0.34,
+  "trade_ts": "2026-05-05T14:23:49+00:00"
+ },
+ "KXPLNT-26MAYMEM-22000000.0": {
+  "pre_yes": 0.09,
+  "trade_ts": "2026-05-06T07:57:16+00:00"
+ },
+ "KXPLNT-26MAYMEM-21800000.0": {
+  "pre_yes": 0.12,
+  "trade_ts": "2026-05-06T08:07:53+00:00"
+ },
+ "KXPLNT-26MAYMEM-21600000.0": {
+  "pre_yes": 0.47,
+  "trade_ts": "2026-05-06T13:42:52+00:00"
+ },
+ "KXPLNT-26MAYMEM-21400000.0": {
+  "pre_yes": 0.86,
+  "trade_ts": "2026-05-06T14:38:17+00:00"
+ },
+ "KXPLNT-26MAYMEM-21200000.0": {
+  "pre_yes": 0.93,
+  "trade_ts": "2026-05-06T02:36:13+00:00"
+ },
+ "KXPLNT-26MAYMEM-21000000.0": {
+  "pre_yes": 0.97,
+  "trade_ts": "2026-05-06T02:09:18+00:00"
+ },
+ "KXPLNT-26MAYMEM-20800000.0": {
+  "pre_yes": 0.99,
+  "trade_ts": "2026-05-06T04:38:07+00:00"
+ },
+ "KXCOINBASE-26MAYVOL-195000000000": {
+  "pre_yes": 0.97,
+  "trade_ts": "2026-05-06T20:15:30+00:00"
+ },
+ "KXCOINBASE-26MAYVOL-205000000000": {
+  "pre_yes": 0.34,
+  "trade_ts": "2026-05-06T22:04:10+00:00"
+ },
+ "KXCOINBASE-26MAYVOL-170000000000": {
+  "pre_yes": 0.99,
+  "trade_ts": "2026-05-03T15:45:51+00:00"
+ },
+ "KXCOINBASE-26MAYVOL-180000000000": {
+  "pre_yes": 0.99,
+  "trade_ts": "2026-05-03T15:53:13+00:00"
+ },
+ "KXCOINBASE-26MAYVOL-190000000000": {
+  "pre_yes": 0.96,
+  "trade_ts": "2026-05-03T14:49:21+00:00"
+ },
+ "KXCOINBASE-26MAYVOL-310000000000": {
+  "pre_yes": 0.04,
+  "trade_ts": "2026-05-06T06:08:03+00:00"
+ },
+ "KXCOINBASE-26MAYVOL-290000000000": {
+  "pre_yes": 0.04,
+  "trade_ts": "2026-05-06T21:10:20+00:00"
+ },
+ "KXCOINBASE-26MAYVOL-280000000000": {
+  "pre_yes": 0.04,
+  "trade_ts": "2026-05-03T20:01:50+00:00"
+ },
+ "KXCOINBASE-26MAYVOL-270000000000": {
+  "pre_yes": 0.04,
+  "trade_ts": "2026-05-06T21:21:58+00:00"
+ },
+ "KXCOINBASE-26MAYVOL-260000000000": {
+  "pre_yes": 0.04,
+  "trade_ts": "2026-05-03T20:53:13+00:00"
+ },
+ "KXCOINBASE-26MAYVOL-250000000000": {
+  "pre_yes": 0.05,
+  "trade_ts": "2026-05-06T21:21:13+00:00"
+ },
+ "KXCOINBASE-26MAYVOL-230000000000": {
+  "pre_yes": 0.1,
+  "trade_ts": "2026-05-06T21:35:16+00:00"
+ },
+ "KXCOINBASE-26MAYVOL-220000000000": {
+  "pre_yes": 0.08,
+  "trade_ts": "2026-05-06T21:02:54+00:00"
+ },
+ "KXCOINBASE-26MAYVOL-210000000000": {
+  "pre_yes": 0.26,
+  "trade_ts": "2026-05-06T21:04:32+00:00"
+ },
+ "KXCOINBASE-26MAYVOL-200000000000": {
+  "pre_yes": 0.69,
+  "trade_ts": "2026-05-06T22:02:21+00:00"
+ },
+ "KXLYFT-26MAYRIDES-240000000": {
+  "pre_yes": 0.86,
+  "trade_ts": "2026-05-06T23:44:49+00:00"
+ },
+ "KXLYFT-26MAYRIDES-245000000": {
+  "pre_yes": 0.32,
+  "trade_ts": "2026-05-06T23:20:09+00:00"
+ },
+ "KXLYFT-26MAYRIDES-250000000": {
+  "pre_yes": 0.09,
+  "trade_ts": "2026-05-06T21:13:42+00:00"
+ },
+ "KXLYFT-26MAYRIDES-255000000": {
+  "pre_yes": 0.02,
+  "trade_ts": "2026-05-06T17:08:48+00:00"
+ },
+ "KXLYFT-26MAYRIDES-260000000": {
+  "pre_yes": 0.02,
+  "trade_ts": "2026-05-06T22:57:17+00:00"
+ },
+ "KXLYFT-26MAYRIDES-265000000": {
+  "pre_yes": 0.01,
+  "trade_ts": "2026-05-06T00:36:28+00:00"
+ },
+ "KXLYFT-26MAYRIDES-270000000": {
+  "pre_yes": 0.01,
+  "trade_ts": "2026-05-04T01:53:00+00:00"
+ },
+ "KXLYFT-26MAYRIDES-275000000": {
+  "pre_yes": 0.01,
+  "trade_ts": "2026-05-04T01:52:35+00:00"
+ },
+ "KXLYFT-26MAYRIDES-280000000": {
+  "pre_yes": 0.01,
+  "trade_ts": "2026-05-04T01:52:28+00:00"
+ },
+ "KXLYFT-26MAYRIDES-285000000": {
+  "pre_yes": 0.01,
+  "trade_ts": "2026-05-04T01:52:21+00:00"
+ },
+ "KXLYFT-26MAYRIDES-290000000": {
+  "pre_yes": 0.01,
+  "trade_ts": "2026-05-04T01:52:16+00:00"
+ },
+ "KXLYFT-26MAYRIDES-295000000": {
+  "pre_yes": 0.01,
+  "trade_ts": "2026-05-04T01:52:09+00:00"
+ },
+ "KXABNB-26APRNEB-125000000": {
+  "pre_yes": 0.99,
+  "trade_ts": "2026-05-03T02:05:29+00:00"
+ },
+ "KXABNB-26APRNEB-130000000": {
+  "pre_yes": 0.99,
+  "trade_ts": "2026-04-21T03:21:03+00:00"
+ },
+ "KXABNB-26APRNEB-135000000": {
+  "pre_yes": 0.99,
+  "trade_ts": "2026-05-04T17:18:47+00:00"
+ },
+ "KXABNB-26APRNEB-140000000": {
+  "pre_yes": 0.99,
+  "trade_ts": "2026-05-06T23:09:28+00:00"
+ },
+ "KXABNB-26APRNEB-145000000": {
+  "pre_yes": 0.98,
+  "trade_ts": "2026-05-06T04:01:42+00:00"
+ },
+ "KXABNB-26APRNEB-160000000": {
+  "pre_yes": 0.1,
+  "trade_ts": "2026-05-06T23:31:32+00:00"
+ },
+ "KXABNB-26APRNEB-165000000": {
+  "pre_yes": 0.01,
+  "trade_ts": "2026-05-06T22:02:38+00:00"
+ },
+ "KXHIMS-26MAYSUBS-2800000.0": {
+  "pre_yes": 0.01,
+  "trade_ts": "2026-05-06T04:23:03+00:00"
+ },
+ "KXHIMS-26MAYSUBS-2750000.0": {
+  "pre_yes": 0.01,
+  "trade_ts": "2026-05-06T04:22:33+00:00"
+ },
+ "KXHIMS-26MAYSUBS-2700000.0": {
+  "pre_yes": 0.05,
+  "trade_ts": "2026-05-09T16:50:19+00:00"
+ },
+ "KXHIMS-26MAYSUBS-2650000.0": {
+  "pre_yes": 0.1,
+  "trade_ts": "2026-05-10T20:54:23+00:00"
+ },
+ "KXHIMS-26MAYSUBS-2600000.0": {
+  "pre_yes": 0.34,
+  "trade_ts": "2026-05-10T21:17:25+00:00"
+ },
+ "KXHIMS-26MAYSUBS-2550000.0": {
+  "pre_yes": 0.78,
+  "trade_ts": "2026-05-10T21:29:08+00:00"
+ },
+ "KXHIMS-26MAYSUBS-2500000.0": {
+  "pre_yes": 0.94,
+  "trade_ts": "2026-05-10T03:36:40+00:00"
+ },
+ "KXHIMS-26MAYSUBS-2450000.0": {
+  "pre_yes": 0.98,
+  "trade_ts": "2026-05-10T12:18:10+00:00"
+ },
+ "KXHIMS-26MAYSUBS-2400000.0": {
+  "pre_yes": 0.98,
+  "trade_ts": "2026-05-09T21:56:55+00:00"
+ },
+ "KXKLAR-26MAYCONS-118000000": {
+  "pre_yes": 0.99,
+  "trade_ts": "2026-05-13T17:53:17+00:00"
+ },
+ "KXKLAR-26MAYCONS-121000000": {
+  "pre_yes": 0.79,
+  "trade_ts": "2026-05-13T15:59:05+00:00"
+ },
+ "KXKLAR-26MAYCONS-126000000": {
+  "pre_yes": 0.02,
+  "trade_ts": "2026-05-13T16:00:03+00:00"
+ },
+ "KXKLAR-26MAYCONS-124000000": {
+  "pre_yes": 0.04,
+  "trade_ts": "2026-05-13T16:06:02+00:00"
+ },
+ "KXKLAR-26MAYCONS-122000000": {
+  "pre_yes": 0.18,
+  "trade_ts": "2026-05-13T17:16:16+00:00"
+ },
+ "KXKLAR-26MAYCONS-120000000": {
+  "pre_yes": 0.84,
+  "trade_ts": "2026-05-13T18:00:39+00:00"
+ },
+ "KXHD-26MAYTRAN-398000000": {
+  "pre_yes": 0.04,
+  "trade_ts": "2026-05-18T07:00:07+00:00"
+ },
+ "KXHD-26MAYTRAN-396000000": {
+  "pre_yes": 0.12,
+  "trade_ts": "2026-05-17T01:01:26+00:00"
+ },
+ "KXHD-26MAYTRAN-394000000": {
+  "pre_yes": 0.34,
+  "trade_ts": "2026-05-18T14:43:31+00:00"
+ },
+ "KXHD-26MAYTRAN-392000000": {
+  "pre_yes": 0.64,
+  "trade_ts": "2026-05-18T15:50:11+00:00"
+ },
+ "KXHD-26MAYTRAN-390000000": {
+  "pre_yes": 0.83,
+  "trade_ts": "2026-05-18T12:49:34+00:00"
+ },
+ "KXHD-26MAYTRAN-388000000": {
+  "pre_yes": 0.92,
+  "trade_ts": "2026-05-18T05:23:03+00:00"
+ },
+ "KXCAVA-26MAYREST-P456": {
+  "pre_yes": 0.71,
+  "trade_ts": "2026-05-18T19:34:16+00:00"
+ },
+ "KXCAVA-26MAYREST-459": {
+  "pre_yes": 0.07,
+  "trade_ts": "2026-05-18T20:20:03+00:00"
+ },
+ "KXCAVA-26MAYREST-458": {
+  "pre_yes": 0.17,
+  "trade_ts": "2026-05-18T20:21:06+00:00"
+ },
+ "KXCAVA-26MAYREST-457": {
+  "pre_yes": 0.51,
+  "trade_ts": "2026-05-18T20:28:39+00:00"
+ },
+ "KXCAVA-26MAYREST-470": {
+  "pre_yes": 0.02,
+  "trade_ts": "2026-05-18T17:05:34+00:00"
+ },
+ "KXCAVA-26MAYREST-465": {
+  "pre_yes": 0.01,
+  "trade_ts": "2026-05-18T20:05:48+00:00"
+ },
+ "KXCAVA-26MAYREST-460": {
+  "pre_yes": 0.02,
+  "trade_ts": "2026-05-18T20:35:17+00:00"
+ },
+ "KXCAVA-26MAYREST-455": {
+  "pre_yes": 0.97,
+  "trade_ts": "2026-05-18T19:49:36+00:00"
+ },
+ "KXCAVA-26MAYREST-450": {
+  "pre_yes": 0.99,
+  "trade_ts": "2026-05-17T16:26:06+00:00"
+ },
+ "KXCAVA-26MAYREST-445": {
+  "pre_yes": 0.99,
+  "trade_ts": "2026-05-16T14:47:17+00:00"
+ },
+ "KXCAVA-26MAYREST-440": {
+  "pre_yes": 0.99,
+  "trade_ts": "2026-05-12T13:58:42+00:00"
+ },
+ "KXURBN-26MAYSTOR-806": {
+  "pre_yes": 0.05,
+  "trade_ts": "2026-05-19T03:44:58+00:00"
+ },
+ "KXURBN-26MAYSTOR-804": {
+  "pre_yes": 0.15,
+  "trade_ts": "2026-05-18T06:39:58+00:00"
+ },
+ "KXURBN-26MAYSTOR-802": {
+  "pre_yes": 0.35,
+  "trade_ts": "2026-05-16T20:48:04+00:00"
+ },
+ "KXURBN-26MAYSTOR-800": {
+  "pre_yes": 0.92,
+  "trade_ts": "2026-05-17T00:29:33+00:00"
+ },
+ "KXURBN-26MAYSTOR-798": {
+  "pre_yes": 0.92,
+  "trade_ts": "2026-05-19T03:48:22+00:00"
+ },
+ "KXLOW-26MAYTRAN-207000000": {
+  "pre_yes": 0.02,
+  "trade_ts": "2026-05-20T03:45:25+00:00"
+ },
+ "KXLOW-26MAYTRAN-204000000": {
+  "pre_yes": 0.06,
+  "trade_ts": "2026-05-20T10:55:46+00:00"
+ },
+ "KXLOW-26MAYTRAN-201000000": {
+  "pre_yes": 0.13,
+  "trade_ts": "2026-05-20T13:44:36+00:00"
+ },
+ "KXLOW-26MAYTRAN-198000000": {
+  "pre_yes": 0.33,
+  "trade_ts": "2026-05-20T13:50:15+00:00"
+ },
+ "KXLOW-26MAYTRAN-195000000": {
+  "pre_yes": 0.72,
+  "trade_ts": "2026-05-20T13:54:50+00:00"
+ },
+ "KXLOW-26MAYTRAN-192000000": {
+  "pre_yes": 0.96,
+  "trade_ts": "2026-05-20T13:00:46+00:00"
+ },
+ "KXBULL-26MAYFUND-5250000": {
+  "pre_yes": 0.09,
+  "trade_ts": "2026-05-20T16:09:56+00:00"
+ },
+ "KXBULL-26MAYFUND-5200000": {
+  "pre_yes": 0.3,
+  "trade_ts": "2026-05-20T19:47:35+00:00"
+ },
+ "KXBULL-26MAYFUND-5150000": {
+  "pre_yes": 0.6,
+  "trade_ts": "2026-05-20T19:44:47+00:00"
+ },
+ "KXBULL-26MAYFUND-5100000": {
+  "pre_yes": 0.86,
+  "trade_ts": "2026-05-20T20:20:28+00:00"
+ },
+ "KXBULL-26MAYFUND-5050000": {
+  "pre_yes": 0.96,
+  "trade_ts": "2026-05-20T14:00:48+00:00"
+ },
+ "KXSNOWFLAKE-26MAYCUST-P785": {
+  "pre_yes": 0.11,
+  "trade_ts": "2026-05-26T20:39:11+00:00"
+ },
+ "KXSNOWFLAKE-26MAYCUST-P780": {
+  "pre_yes": 0.16,
+  "trade_ts": "2026-05-26T18:58:03+00:00"
+ },
+ "KXSNOWFLAKE-26MAYCUST-P775": {
+  "pre_yes": 0.34,
+  "trade_ts": "2026-05-26T18:36:37+00:00"
+ },
+ "KXSNOWFLAKE-26MAYCUST-P770": {
+  "pre_yes": 0.68,
+  "trade_ts": "2026-05-26T20:54:22+00:00"
+ },
+ "KXSNOWFLAKE-26MAYCUST-P765": {
+  "pre_yes": 0.9,
+  "trade_ts": "2026-05-26T14:18:07+00:00"
+ },
+ "KXSNOWFLAKE-26MAYCUST-P760": {
+  "pre_yes": 0.95,
+  "trade_ts": "2026-05-26T14:27:07+00:00"
+ },
+ "KXSNOWFLAKE-26MAYCUST-P755": {
+  "pre_yes": 0.97,
+  "trade_ts": "2026-05-25T20:33:04+00:00"
+ },
+ "KXFUTU-26MAYFUNDED-3625000": {
+  "pre_yes": 0.34,
+  "trade_ts": "2026-05-27T13:24:31+00:00"
+ },
+ "KXFUTU-26MAYFUNDED-P3750000": {
+  "pre_yes": 0.02,
+  "trade_ts": "2026-05-25T16:56:28+00:00"
+ },
+ "KXFUTU-26MAYFUNDED-P3700000": {
+  "pre_yes": 0.06,
+  "trade_ts": "2026-05-26T00:54:39+00:00"
+ },
+ "KXFUTU-26MAYFUNDED-P3650000": {
+  "pre_yes": 0.16,
+  "trade_ts": "2026-05-27T13:25:13+00:00"
+ },
+ "KXFUTU-26MAYFUNDED-P3600000": {
+  "pre_yes": 0.59,
+  "trade_ts": "2026-05-27T12:37:23+00:00"
+ },
+ "KXFUTU-26MAYFUNDED-P3550000": {
+  "pre_yes": 0.9,
+  "trade_ts": "2026-05-23T05:47:19+00:00"
+ },
+ "KXFUTU-26MAYFUNDED-P3500000": {
+  "pre_yes": 0.97,
+  "trade_ts": "2026-05-26T14:25:51+00:00"
+ },
+ "KXCOST-26MAYCARDS-148500000": {
+  "pre_yes": 0.7,
+  "trade_ts": "2026-05-27T21:04:48+00:00"
+ },
+ "KXCOST-26MAYCARDS-152000000.0": {
+  "pre_yes": 0.01,
+  "trade_ts": "2026-05-27T15:08:51+00:00"
+ },
+ "KXCOST-26MAYCARDS-151000000.0": {
+  "pre_yes": 0.01,
+  "trade_ts": "2026-05-25T16:39:44+00:00"
+ },
+ "KXCOST-26MAYCARDS-150000000.0": {
+  "pre_yes": 0.08,
+  "trade_ts": "2026-05-27T19:43:40+00:00"
+ },
+ "KXCOST-26MAYCARDS-149000000.0": {
+  "pre_yes": 0.36,
+  "trade_ts": "2026-05-27T20:33:26+00:00"
+ },
+ "KXCOST-26MAYCARDS-148000000.0": {
+  "pre_yes": 0.91,
+  "trade_ts": "2026-05-27T15:52:06+00:00"
+ },
+ "KXCOST-26MAYCARDS-147000000.0": {
+  "pre_yes": 0.97,
+  "trade_ts": "2026-05-27T17:24:02+00:00"
+ },
+ "KXCOST-26MAYCARDS-146000000.0": {
+  "pre_yes": 0.98,
+  "trade_ts": "2026-05-27T15:59:49+00:00"
+ },
+ "KXMTN-26JUNSKIER-7400000": {
+  "pre_yes": 0.06,
+  "trade_ts": "2026-06-07T05:09:58+00:00"
+ },
+ "KXMTN-26JUNSKIER-7300000": {
+  "pre_yes": 0.14,
+  "trade_ts": "2026-06-07T20:21:14+00:00"
+ },
+ "KXMTN-26JUNSKIER-7100000": {
+  "pre_yes": 0.86,
+  "trade_ts": "2026-06-07T18:22:48+00:00"
+ },
+ "KXMTN-26JUNSKIER-7000000": {
+  "pre_yes": 0.89,
+  "trade_ts": "2026-06-07T05:08:26+00:00"
+ },
+ "KXMTN-26JUNSKIER-8700000.0": {
+  "pre_yes": 0.01,
+  "trade_ts": "2026-05-22T22:48:04+00:00"
+ },
+ "KXMTN-26JUNSKIER-8400000.0": {
+  "pre_yes": 0.01,
+  "trade_ts": "2026-06-03T19:57:12+00:00"
+ },
+ "KXMTN-26JUNSKIER-8100000.0": {
+  "pre_yes": 0.01,
+  "trade_ts": "2026-06-04T01:25:46+00:00"
+ },
+ "KXMTN-26JUNSKIER-7800000.0": {
+  "pre_yes": 0.02,
+  "trade_ts": "2026-06-07T18:19:31+00:00"
+ },
+ "KXMTN-26JUNSKIER-7500000.0": {
+  "pre_yes": 0.03,
+  "trade_ts": "2026-06-06T09:21:00+00:00"
+ },
+ "KXMTN-26JUNSKIER-7200000.0": {
+  "pre_yes": 0.26,
+  "trade_ts": "2026-06-07T19:17:24+00:00"
+ },
+ "KXMTN-26JUNSKIER-6900000.0": {
+  "pre_yes": 0.95,
+  "trade_ts": "2026-06-06T20:09:32+00:00"
+ },
+ "KXMTN-26JUNSKIER-6600000.0": {
+  "pre_yes": 0.96,
+  "trade_ts": "2026-06-07T18:22:31+00:00"
+ },
+ "KXCCL-26JUNALBD-25500000.0": {
+  "pre_yes": 0.05,
+  "trade_ts": "2026-06-14T00:00:31+00:00"
+ },
+ "KXCCL-26JUNALBD-25200000.0": {
+  "pre_yes": 0.01,
+  "trade_ts": "2026-06-09T21:24:53+00:00"
+ },
+ "KXCCL-26JUNALBD-24900000.0": {
+  "pre_yes": 0.01,
+  "trade_ts": "2026-06-14T08:58:31+00:00"
+ },
+ "KXCCL-26JUNALBD-24600000.0": {
+  "pre_yes": 0.91,
+  "trade_ts": "2026-06-22T11:53:54+00:00"
+ },
+ "KXCCL-26JUNALBD-24300000.0": {
+  "pre_yes": 0.96,
+  "trade_ts": "2026-06-22T05:47:54+00:00"
+ },
+ "KXCCL-26JUNALBD-24000000.0": {
+  "pre_yes": 0.98,
+  "trade_ts": "2026-06-17T20:38:37+00:00"
+ },
+ "KXCCL-26JUNALBD-23700000.0": {
+  "pre_yes": 0.97,
+  "trade_ts": "2026-06-20T08:01:46+00:00"
+ },
+ "KXFDX-26JUNADV-18000000.0": {
+  "pre_yes": 0.05,
+  "trade_ts": "2026-06-22T06:59:58+00:00"
+ },
+ "KXFDX-26JUNADV-17800000.0": {
+  "pre_yes": 0.03,
+  "trade_ts": "2026-06-22T20:15:09+00:00"
+ },
+ "KXFDX-26JUNADV-17600000.0": {
+  "pre_yes": 0.11,
+  "trade_ts": "2026-06-22T20:47:22+00:00"
+ },
+ "KXFDX-26JUNADV-17400000.0": {
+  "pre_yes": 0.34,
+  "trade_ts": "2026-06-22T20:36:16+00:00"
+ },
+ "KXFDX-26JUNADV-17200000.0": {
+  "pre_yes": 0.69,
+  "trade_ts": "2026-06-22T19:38:59+00:00"
+ },
+ "KXFDX-26JUNADV-17000000.0": {
+  "pre_yes": 0.91,
+  "trade_ts": "2026-06-22T20:12:11+00:00"
+ },
+ "KXFDX-26JUNADV-16800000.0": {
+  "pre_yes": 0.95,
+  "trade_ts": "2026-06-22T04:51:03+00:00"
+ },
+ "KXFDX-26JUNADV-16600000.000000002": {
+  "pre_yes": 0.95,
+  "trade_ts": "2026-06-22T18:53:10+00:00"
+ },
+ "KXFDX-26JUNADV-16399999.999999998": {
+  "pre_yes": 0.98,
+  "trade_ts": "2026-06-22T15:24:57+00:00"
+ },
+ "KXFDX-26JUNADV-16200000.0": {
+  "pre_yes": 0.98,
+  "trade_ts": "2026-06-22T03:32:08+00:00"
+ },
+ "KXFDX-26JUNADV-16000000.0": {
+  "pre_yes": 0.97,
+  "trade_ts": "2026-06-20T10:15:12+00:00"
+ },
+ "KXSTZ-26JUNBEER-118000000": {
+  "pre_yes": 0.02,
+  "trade_ts": "2026-06-29T03:31:09+00:00"
+ },
+ "KXSTZ-26JUNBEER-116000000": {
+  "pre_yes": 0.11,
+  "trade_ts": "2026-06-29T15:02:29+00:00"
+ },
+ "KXSTZ-26JUNBEER-114000000": {
+  "pre_yes": 0.19,
+  "trade_ts": "2026-06-29T15:01:54+00:00"
+ },
+ "KXSTZ-26JUNBEER-113000000": {
+  "pre_yes": 0.19,
+  "trade_ts": "2026-06-29T15:01:32+00:00"
+ },
+ "KXSTZ-26JUNBEER-112000000": {
+  "pre_yes": 0.3,
+  "trade_ts": "2026-06-29T16:30:31+00:00"
+ },
+ "KXSTZ-26JUNBEER-111000000": {
+  "pre_yes": 0.56,
+  "trade_ts": "2026-06-29T19:26:40+00:00"
+ },
+ "KXSTZ-26JUNBEER-110000000": {
+  "pre_yes": 0.91,
+  "trade_ts": "2026-06-25T23:51:14+00:00"
+ },
+ "KXSTZ-26JUNBEER-108000000": {
+  "pre_yes": 0.95,
+  "trade_ts": "2026-06-29T03:27:58+00:00"
+ },
+ "KXSTZ-26JUNBEER-106000000": {
+  "pre_yes": 0.97,
+  "trade_ts": "2026-06-27T00:17:08+00:00"
+ },
+ "KXTSLA-26JULDELIV-485000": {
+  "pre_yes": 0.15,
+  "trade_ts": "2026-07-01T02:39:51+00:00"
+ },
+ "KXTSLA-26JULDELIV-475000": {
+  "pre_yes": 0.53,
+  "trade_ts": "2026-07-01T13:31:35+00:00"
+ },
+ "KXTSLA-26JULDELIV-500000": {
+  "pre_yes": 0.07,
+  "trade_ts": "2026-07-01T02:45:29+00:00"
+ },
+ "KXTSLA-26JULDELIV-490000": {
+  "pre_yes": 0.04,
+  "trade_ts": "2026-07-01T07:42:23+00:00"
+ },
+ "KXTSLA-26JULDELIV-480000": {
+  "pre_yes": 0.35,
+  "trade_ts": "2026-07-01T13:18:26+00:00"
+ },
+ "KXTSLA-26JULDELIV-470000": {
+  "pre_yes": 0.5,
+  "trade_ts": "2026-07-01T13:31:46+00:00"
+ },
+ "KXTSLA-26JULDELIV-460000.0": {
+  "pre_yes": 0.65,
+  "trade_ts": "2026-07-01T13:02:48+00:00"
+ },
+ "KXTSLA-26JULDELIV-450000.0": {
+  "pre_yes": 0.75,
+  "trade_ts": "2026-07-01T08:47:10+00:00"
+ },
+ "KXTSLA-26JULDELIV-440000.0": {
+  "pre_yes": 0.73,
+  "trade_ts": "2026-07-01T13:30:31+00:00"
+ },
+ "KXTSLA-26JULDELIV-430000.0": {
+  "pre_yes": 0.75,
+  "trade_ts": "2026-07-01T12:22:39+00:00"
+ },
+ "KXTSLA-26JULDELIV-420000.0": {
+  "pre_yes": 0.88,
+  "trade_ts": "2026-07-01T12:39:12+00:00"
+ },
+ "KXTSLA-26JULDELIV-410000.0": {
+  "pre_yes": 0.91,
+  "trade_ts": "2026-07-01T12:51:04+00:00"
+ },
+ "KXTSLA-26JULDELIV-400000.0": {
+  "pre_yes": 0.96,
+  "trade_ts": "2026-07-01T06:29:54+00:00"
+ },
+ "KXTSLA-26JULDELIV-390000.0": {
+  "pre_yes": 0.97,
+  "trade_ts": "2026-06-29T17:46:41+00:00"
+ },
+ "KXTSLA-26JULDELIV-380000.0": {
+  "pre_yes": 0.99,
+  "trade_ts": "2026-07-01T04:59:26+00:00"
+ },
+ "KXTSLA-26JULDELIV-370000.0": {
+  "pre_yes": 0.95,
+  "trade_ts": "2026-06-17T22:54:47+00:00"
+ },
+ "KXTSLA-26JULDELIV-360000.0": {
+  "pre_yes": 0.99,
+  "trade_ts": "2026-07-01T12:39:02+00:00"
+ },
+ "KXTSLA-26JULDELIV-350000.0": {
+  "pre_yes": 0.94,
+  "trade_ts": "2026-06-30T08:21:42+00:00"
+ },
+ "KXTSLA-26JULDELIV-340000.0": {
+  "pre_yes": 0.97,
+  "trade_ts": "2026-06-28T05:38:46+00:00"
+ },
+ "KXTSLA-26JULDELIV-330000.0": {
+  "pre_yes": 0.95,
+  "trade_ts": "2026-06-27T16:45:02+00:00"
+ },
+ "KXTSLA-26JULDELIV-320000.0": {
+  "pre_yes": 0.95,
+  "trade_ts": "2026-06-26T22:36:07+00:00"
+ },
+ "KXTSLA-26JULDELIV-310000.0": {
+  "pre_yes": 0.96,
+  "trade_ts": "2026-06-30T15:45:51+00:00"
+ },
+ "KXRIVN-26AUGDELIV-10000": {
+  "pre_yes": 0.86,
+  "trade_ts": "2026-06-28T14:33:51+00:00"
+ },
+ "KXRIVN-26AUGDELIV-10500": {
+  "pre_yes": 0.84,
+  "trade_ts": "2026-06-23T20:55:30+00:00"
+ },
+ "KXRIVN-26AUGDELIV-P11000": {
+  "pre_yes": 0.45,
+  "trade_ts": "2026-07-01T10:55:42+00:00"
+ },
+ "KXRIVN-26AUGDELIV-P11500": {
+  "pre_yes": 0.37,
+  "trade_ts": "2026-07-01T07:31:15+00:00"
+ },
+ "KXRIVN-26AUGDELIV-P12000": {
+  "pre_yes": 0.27,
+  "trade_ts": "2026-07-01T00:00:08+00:00"
+ },
+ "KXRIVN-26AUGDELIV-P12500": {
+  "pre_yes": 0.21,
+  "trade_ts": "2026-06-27T02:34:02+00:00"
+ },
+ "KXRIVN-26AUGDELIV-17500": {
+  "pre_yes": 0.01,
+  "trade_ts": "2026-06-18T02:30:22+00:00"
+ },
+ "KXRIVN-26AUGDELIV-17000": {
+  "pre_yes": 0.01,
+  "trade_ts": "2026-06-18T02:37:55+00:00"
+ },
+ "KXRIVN-26AUGDELIV-16500": {
+  "pre_yes": 0.01,
+  "trade_ts": "2026-06-28T11:17:03+00:00"
+ },
+ "KXRIVN-26AUGDELIV-16000": {
+  "pre_yes": 0.07,
+  "trade_ts": "2026-06-11T01:39:29+00:00"
+ },
+ "KXRIVN-26AUGDELIV-15000": {
+  "pre_yes": 0.12,
+  "trade_ts": "2026-07-01T08:53:35+00:00"
+ },
+ "KXRIVN-26AUGDELIV-14500": {
+  "pre_yes": 0.07,
+  "trade_ts": "2026-06-15T17:10:14+00:00"
+ },
+ "KXRIVN-26AUGDELIV-14000": {
+  "pre_yes": 0.15,
+  "trade_ts": "2026-06-16T12:13:49+00:00"
+ },
+ "KXRIVN-26AUGDELIV-13500": {
+  "pre_yes": 0.16,
+  "trade_ts": "2026-06-19T17:18:07+00:00"
+ },
+ "KXRIVN-26AUGDELIV-13000": {
+  "pre_yes": 0.18,
+  "trade_ts": "2026-06-27T23:11:22+00:00"
+ },
+ "KXTSLA-26JULPROD-480000": {
+  "pre_yes": 0.3,
+  "trade_ts": "2026-06-28T21:03:07+00:00"
+ },
+ "KXTSLA-26JULPROD-470000": {
+  "pre_yes": 0.14,
+  "trade_ts": "2026-06-28T17:26:08+00:00"
+ },
+ "KXTSLA-26JULPROD-450000": {
+  "pre_yes": 0.34,
+  "trade_ts": "2026-07-01T13:41:23+00:00"
+ },
+ "KXTSLA-26JULPROD-430000": {
+  "pre_yes": 0.71,
+  "trade_ts": "2026-07-01T12:40:58+00:00"
+ },
+ "KXTSLA-26JULPROD-410000": {
+  "pre_yes": 0.96,
+  "trade_ts": "2026-07-01T06:23:40+00:00"
+ },
+ "KXTSLA-26JULPROD-460000.0": {
+  "pre_yes": 0.27,
+  "trade_ts": "2026-07-01T10:04:17+00:00"
+ },
+ "KXTSLA-26JULPROD-440000.0": {
+  "pre_yes": 0.66,
+  "trade_ts": "2026-07-01T13:39:40+00:00"
+ },
+ "KXTSLA-26JULPROD-420000.0": {
+  "pre_yes": 0.8,
+  "trade_ts": "2026-07-01T12:40:49+00:00"
+ },
+ "KXTSLA-26JULPROD-400000.0": {
+  "pre_yes": 0.95,
+  "trade_ts": "2026-07-01T06:23:55+00:00"
+ },
+ "KXTSLA-26JULPROD-380000.0": {
+  "pre_yes": 0.98,
+  "trade_ts": "2026-06-30T21:29:07+00:00"
+ },
+ "KXTSLA-26JULPROD-360000.0": {
+  "pre_yes": 0.98,
+  "trade_ts": "2026-06-28T14:32:07+00:00"
+ },
+ "KXTSLA-26JULPROD-340000.0": {
+  "pre_yes": 0.97,
+  "trade_ts": "2026-06-18T10:36:43+00:00"
+ },
+ "KXF-26JULUSSALES-550000": {
+  "pre_yes": 0.01,
+  "trade_ts": "2026-07-05T05:28:18+00:00"
+ },
+ "KXF-26JULUSSALES-530000": {
+  "pre_yes": 0.99,
+  "trade_ts": "2026-07-03T23:58:07+00:00"
+ },
+ "KXF-26JULUSSALES-600000": {
+  "pre_yes": 0.01,
+  "trade_ts": "2026-07-02T13:56:01+00:00"
+ },
+ "KXF-26JULUSSALES-580000": {
+  "pre_yes": 0.01,
+  "trade_ts": "2026-07-03T23:50:14+00:00"
+ },
+ "KXF-26JULUSSALES-560000": {
+  "pre_yes": 0.01,
+  "trade_ts": "2026-07-02T22:19:41+00:00"
+ },
+ "KXF-26JULUSSALES-540000": {
+  "pre_yes": 0.99,
+  "trade_ts": "2026-07-04T23:22:32+00:00"
+ },
+ "KXF-26JULUSSALES-520000": {
+  "pre_yes": 0.99,
+  "trade_ts": "2026-07-03T12:29:26+00:00"
+ },
+ "KXF-26JULUSSALES-500000": {
+  "pre_yes": 0.99,
+  "trade_ts": "2026-07-04T13:56:39+00:00"
+ },
+ "KXF-26JULUSSALES-480000": {
+  "pre_yes": 0.99,
+  "trade_ts": "2026-07-02T13:16:52+00:00"
+ },
+ "KXBA-26JULDELIV-164": {
+  "pre_yes": 0.96,
+  "trade_ts": "2026-07-13T20:58:14+00:00"
+ },
+ "KXBA-26JULDELIV-163": {
+  "pre_yes": 0.97,
+  "trade_ts": "2026-07-12T21:52:27+00:00"
+ },
+ "KXBA-26JULDELIV-161": {
+  "pre_yes": 0.98,
+  "trade_ts": "2026-07-13T15:02:34+00:00"
+ },
+ "KXBA-26JULDELIV-162": {
+  "pre_yes": 0.98,
+  "trade_ts": "2026-07-12T03:09:38+00:00"
+ },
+ "KXBA-26JULDELIV-155": {
+  "pre_yes": 0.99,
+  "trade_ts": "2026-07-11T19:21:45+00:00"
+ },
+ "KXBA-26JULDELIV-180": {
+  "pre_yes": 0.01,
+  "trade_ts": "2026-07-06T03:22:05+00:00"
+ },
+ "KXBA-26JULDELIV-175": {
+  "pre_yes": 0.01,
+  "trade_ts": "2026-07-13T15:03:09+00:00"
+ },
+ "KXBA-26JULDELIV-165": {
+  "pre_yes": 0.95,
+  "trade_ts": "2026-07-13T19:32:17+00:00"
+ },
+ "KXBA-26JULDELIV-170": {
+  "pre_yes": 0.09,
+  "trade_ts": "2026-07-13T20:35:28+00:00"
+ },
+ "KXBA-26JULDELIV-160": {
+  "pre_yes": 0.98,
+  "trade_ts": "2026-07-13T22:07:41+00:00"
+ },
+ "KXBA-26JULDELIV-150": {
+  "pre_yes": 0.99,
+  "trade_ts": "2026-07-10T08:20:17+00:00"
+ },
+ "KXBA-26JULDELIV-140": {
+  "pre_yes": 0.99,
+  "trade_ts": "2026-07-06T19:34:06+00:00"
+ },
+ "KXBA-26JULDELIV-130": {
+  "pre_yes": 0.99,
+  "trade_ts": "2026-07-10T08:20:43+00:00"
+ },
+ "KXBA-26JULDELIV-120": {
+  "pre_yes": 0.99,
+  "trade_ts": "2026-07-10T08:20:31+00:00"
+ },
+ "KXUAL-26JULPAX-48750000": {
+  "pre_yes": 0.25,
+  "trade_ts": "2026-07-14T20:16:45+00:00"
+ },
+ "KXUAL-26JULPAX-48250000": {
+  "pre_yes": 0.43,
+  "trade_ts": "2026-07-14T22:18:20+00:00"
+ },
+ "KXUAL-26JULPAX-50000000": {
+  "pre_yes": 0.03,
+  "trade_ts": "2026-07-14T18:13:13+00:00"
+ },
+ "KXUAL-26JULPAX-49500000": {
+  "pre_yes": 0.02,
+  "trade_ts": "2026-07-14T21:31:29+00:00"
+ },
+ "KXUAL-26JULPAX-49000000": {
+  "pre_yes": 0.13,
+  "trade_ts": "2026-07-14T11:27:36+00:00"
+ },
+ "KXUAL-26JULPAX-48500000.0": {
+  "pre_yes": 0.28,
+  "trade_ts": "2026-07-14T22:48:50+00:00"
+ },
+ "KXUAL-26JULPAX-48000000.0": {
+  "pre_yes": 0.64,
+  "trade_ts": "2026-07-14T21:31:14+00:00"
+ },
+ "KXUAL-26JULPAX-47500000.0": {
+  "pre_yes": 0.89,
+  "trade_ts": "2026-07-14T20:14:44+00:00"
+ },
+ "KXUAL-26JULPAX-47000000.0": {
+  "pre_yes": 0.93,
+  "trade_ts": "2026-07-13T19:26:31+00:00"
+ },
+ "KXUAL-26JULPAX-46500000.0": {
+  "pre_yes": 0.94,
+  "trade_ts": "2026-07-13T21:15:47+00:00"
+ },
+ "KXUAL-26JULPAX-46000000.0": {
+  "pre_yes": 0.97,
+  "trade_ts": "2026-07-14T01:45:52+00:00"
+ },
+ "KXUAL-26JULPAX-45500000.0": {
+  "pre_yes": 0.94,
+  "trade_ts": "2026-07-10T17:41:11+00:00"
+ },
+ "KXUAL-26JULPAX-45000000.0": {
+  "pre_yes": 0.98,
+  "trade_ts": "2026-07-14T17:15:12+00:00"
+ }
+}

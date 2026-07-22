@@ -1,0 +1,56 @@
+{
+ "summary": {
+  "bankroll_start": 1000.0,
+  "bankroll_end": 0.0,
+  "positions": 2,
+  "stake_per_position": 500.0,
+  "realized_pnl": -1000.0,
+  "return_pct": -100.0,
+  "wins": 0,
+  "losses": 2,
+  "win_rate": 0,
+  "window": "2026-07-14..2026-07-22",
+  "mode": "blind_no_search",
+  "week_brier_cp": 0.1363,
+  "week_brier_market": 0.1274,
+  "week_scored_contracts": 15,
+  "alltime_brier_cp": 0.2369,
+  "alltime_brier_market": 0.0895,
+  "alltime_scored_contracts": 257,
+  "min_edge": 0.05
+ },
+ "positions": [
+  {
+   "co": "Boeing",
+   "metric": "Commercial Deliveries",
+   "period": "Q2 2026",
+   "resolves": "2026-07-14",
+   "ticker": "KXBA-26JULDELIV-165",
+   "question": "Will Boeing Company (The) report above 165 commercial deliveries in Q2 2026?",
+   "side": "NO",
+   "entry": 0.05,
+   "cp_p": 0.523,
+   "mkt_pre": 0.95,
+   "result": "yes",
+   "won": false,
+   "stake": 500.0,
+   "pnl": -500.0
+  },
+  {
+   "co": "United Airlines",
+   "metric": "Passengers",
+   "period": "Q2 2026",
+   "resolves": "2026-07-15",
+   "ticker": "KXUAL-26JULPAX-47500000.0",
+   "question": "Will United Airlines Holdings Inc. report Above 47.5 million passengers in Q2 2026?",
+   "side": "NO",
+   "entry": 0.11,
+   "cp_p": 0.732,
+   "mkt_pre": 0.89,
+   "result": "yes",
+   "won": false,
+   "stake": 500.0,
+   "pnl": -500.0
+  }
+ ]
+}

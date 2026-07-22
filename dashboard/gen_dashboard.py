@@ -98,11 +98,16 @@ if PORT_PATH.exists():
 SCORES=ROOT/"data"/"forecasts"/"resolved_scores.jsonl"
 track=[json.loads(l) for l in SCORES.open()] if SCORES.exists() else []
 
+# ---- backtest portfolio (last week, blind, $1k) ----
+BT_PATH=ROOT/"data"/"backtest_portfolio.json"
+backtest=json.loads(BT_PATH.read_text()) if BT_PATH.exists() else {"summary":None,"positions":[]}
+
 DATA_JSON=json.dumps(data,separators=(",",":"))
 MONTHS_JSON=json.dumps(sorted(months.items()))
 STATS_JSON=json.dumps(stats)
 PORT_JSON=json.dumps(portfolio,separators=(",",":"))
 TRACK_JSON=json.dumps(track,separators=(",",":"))
+BT_JSON=json.dumps(backtest,separators=(",",":"))
 
 HTML = r"""<title>Company-KPI open markets</title>
 <style>
@@ -183,6 +188,25 @@ tbody td{padding:10px 12px;border-bottom:1px solid var(--border);vertical-align:
   </div>
   <div class="tiles" id="tiles"></div>
 
+  <div class="panel" id="btpanel" style="display:none">
+    <h2>Backtest portfolio &mdash; last week, blind forecasts, $1k start</h2>
+    <div class="tiles" id="bttiles" style="margin-bottom:14px"></div>
+    <div class="tblwrap" style="border-radius:10px"><table>
+      <thead><tr>
+        <th>Side</th><th>Position</th><th class="num">Resolved</th>
+        <th class="num">Entry</th><th class="num">Our P</th><th class="num">Mkt P</th>
+        <th class="num">Result</th><th class="num">P&amp;L</th>
+      </tr></thead>
+      <tbody id="btbody"></tbody>
+    </table></div>
+    <div class="foot" style="margin-top:10px">
+      Retroactive but leakage-free: forecasts made with web access disabled (model
+      knowledge ends Jan 2026, before every outcome), entered at the last real trade
+      price &ge;24h before each market closed, settled at the actual result. Same
+      position rule as the live book; $1,000 split equally across positions.
+    </div>
+  </div>
+
   <div class="panel" id="trackpanel" style="display:none">
     <h2>Track record &mdash; resolved forecasts</h2>
     <div class="tblwrap" style="border-radius:10px"><table>
@@ -210,10 +234,10 @@ tbody td{padding:10px 12px;border-bottom:1px solid var(--border);vertical-align:
       <tbody id="portbody"></tbody>
     </table></div>
     <div class="foot" style="margin-top:10px">
-      One position per forecasted metric: the contract where ClaudeProphet most
-      disagrees with the market (min 5 pt gap), $__PSTAKE__ paper stake at the mid.
-      P&amp;L is marked to the latest price pull and realizes when markets settle.
-      Paper only &mdash; nothing is traded.
+      $1,000 paper bankroll split equally: one position per forecasted metric, on
+      the contract where ClaudeProphet (live research) most disagrees with the
+      market (min 5 pt gap), entered at the mid. P&amp;L is marked to the latest
+      price pull and realizes when markets settle. Paper only &mdash; nothing is traded.
     </div>
   </div>
 
@@ -242,7 +266,7 @@ tbody td{padding:10px 12px;border-bottom:1px solid var(--border);vertical-align:
 </div>
 
 <script>
-const DATA=__DATA__, MONTHS=__MONTHS__, STATS=__STATS__, PORT=__PORT__, TRACK=__TRACK__;
+const DATA=__DATA__, MONTHS=__MONTHS__, STATS=__STATS__, PORT=__PORT__, TRACK=__TRACK__, BT=__BT__;
 const root=document.documentElement;
 function setTheme(t){root.setAttribute('data-theme',t);try{localStorage.setItem('kpi-theme',t);}catch(e){}}
 (function(){let s=null;try{s=localStorage.getItem('kpi-theme');}catch(e){}setTheme(s||(matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light'));})();
@@ -257,6 +281,32 @@ document.getElementById('tiles').innerHTML=[
   ['Next resolution',STATS.next,'small'],
 ].map(t=>`<div class="tile ${t[2].includes('hl')?'hl':''}"><div class="lab">${t[0]}</div><div class="val ${t[2].replace('hl','').trim()}">${t[1]}</div></div>`).join('');
 
+if(BT.summary){
+  const s=BT.summary;
+  document.getElementById('btpanel').style.display='';
+  const money=v=>(v<0?'-':'+')+'$'+Math.abs(v).toFixed(0);
+  const cls=v=>v>=0?'style="color:var(--up)"':'style="color:var(--down)"';
+  document.getElementById('bttiles').innerHTML=[
+    ['Bankroll','$'+s.bankroll_start.toFixed(0)+' &rarr; <span '+cls(s.realized_pnl)+'>$'+s.bankroll_end.toFixed(0)+'</span>','small'],
+    ['Return',`<span ${cls(s.realized_pnl)}>${(s.return_pct>=0?'+':'')+s.return_pct}%</span>`],
+    ['Record',`${s.wins}W&ndash;${s.losses}L`],
+    ['Week Brier &mdash; CP',s.week_brier_cp!=null?s.week_brier_cp.toFixed(3):'&mdash;','small'],
+    ['Week Brier &mdash; market',s.week_brier_market!=null?s.week_brier_market.toFixed(3):'&mdash;','small'],
+    ['All resolved Brier',s.alltime_brier_cp!=null?`CP ${s.alltime_brier_cp.toFixed(3)} vs mkt ${s.alltime_brier_market.toFixed(3)}`:'&mdash;','small'],
+  ].map(t=>`<div class="tile"><div class="lab">${t[0]}</div><div class="val ${t[2]||''}" style="font-size:${t[2]?'15px':'22px'}">${t[1]}</div></div>`).join('');
+  document.getElementById('btbody').innerHTML=BT.positions.map(p=>{
+    const sideC=p.side==='YES'?'var(--yes)':'var(--no)';
+    return `<tr>
+      <td><span style="color:${sideC};font-weight:600">${p.side}</span></td>
+      <td><span style="font-weight:500">${p.co}</span> &mdash; ${p.metric}<span class="nc">${p.period}</span></td>
+      <td class="num tnum">${p.resolves}</td>
+      <td class="num tnum">${p.entry.toFixed(2)}</td>
+      <td class="num tnum">${p.cp_p.toFixed(2)}</td>
+      <td class="num tnum">${p.mkt_pre.toFixed(2)}</td>
+      <td class="num tnum">${p.result.toUpperCase()}</td>
+      <td class="num"><span class="tnum" style="color:${p.pnl>=0?'var(--up)':'var(--down)'};font-weight:500">${p.pnl>=0?'+':''}$${p.pnl.toFixed(0)}</span></td>
+    </tr>`;}).join('');
+}
 if(TRACK.length){
   document.getElementById('trackpanel').style.display='';
   const fm=v=>{if(v>=1e9)return (v/1e9).toFixed(2)+'B';if(v>=1e6)return (v/1e6).toFixed(2)+'M';if(v>=1e3)return Math.round(v/1e3)+'K';return String(v);};
@@ -361,7 +411,7 @@ q.oninput=view;mo.onchange=view;lv.onchange=view;fo.onchange=view;view();
 
 html=(HTML.replace("__DATA__",DATA_JSON).replace("__MONTHS__",MONTHS_JSON)
           .replace("__STATS__",STATS_JSON).replace("__PORT__",PORT_JSON)
-          .replace("__TRACK__",TRACK_JSON)
+          .replace("__TRACK__",TRACK_JSON).replace("__BT__",BT_JSON)
           .replace("__PSTAKE__",str(int(portfolio["summary"]["stake"]) if portfolio.get("summary") else 100))
           .replace("__SNAP__",SNAP))
 OUT.write_text(html,encoding="utf-8")
