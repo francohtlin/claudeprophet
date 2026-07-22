@@ -9,7 +9,7 @@ ROOT = Path(__file__).resolve().parents[1]
 SRC = OPEN_MARKETS
 FCST = FORECASTS
 OUT = ROOT / "docs" / "index.html"
-SNAP = "2026-07-21"
+SNAP = "2026-07-22"
 
 rows = [json.loads(l) for l in SRC.open()]
 
@@ -59,9 +59,50 @@ live=sum(1 for d in data if d["medop"]=="~")
 stats={"markets":len(rows),"metrics":len(data),"companies":len(companies),"live":live,
        "next":min(cts) if cts else "-","forecasts":nf}
 
+# ---- paper portfolio: mark open positions to the latest pull ----
+price_by_ticker={r["ticker"]:r.get("yes_mid") for r in rows}
+PORT_PATH=ROOT/"data"/"portfolio.json"
+portfolio={"positions":[],"summary":None}
+if PORT_PATH.exists():
+    led=json.loads(PORT_PATH.read_text())
+    pos_out=[]; unreal=0.0; realized=0.0; wins=0; losses=0; deployed=0.0
+    for p in led["positions"]:
+        cur_yes=price_by_ticker.get(p["ticker"])
+        row={"co":p["co"],"metric":p["metric"],"period":p["period"],"r":p["resolves"],
+             "q":p["question"],"side":p["side"],"entry":p["entry_price"],
+             "cp_p":p["cp_p"],"mkt_entry":p["entry_yes_mid"],"stake":p["stake"],
+             "status":p["status"],"result":p.get("result"),"pnl":None,"cur":None}
+        if p["status"]=="resolved":
+            realized+=p["realized_pnl"] or 0.0
+            row["pnl"]=p["realized_pnl"]
+            if (p["realized_pnl"] or 0)>0: wins+=1
+            else: losses+=1
+        else:
+            deployed+=p["stake"]
+            if cur_yes is not None:
+                cur = cur_yes if p["side"]=="YES" else round(1-cur_yes,3)
+                row["cur"]=cur
+                row["pnl"]=round(p["contracts"]*(cur-p["entry_price"]),2)
+                unreal+=row["pnl"]
+        pos_out.append(row)
+    pos_out.sort(key=lambda x:(x["status"]!="resolved", -(abs(x["pnl"]) if x["pnl"] is not None else -1)))
+    portfolio={"positions":pos_out,
+               "summary":{"deployed":round(deployed,2),"unrealized":round(unreal,2),
+                          "realized":round(realized,2),
+                          "open":sum(1 for x in pos_out if x["status"]=="open"),
+                          "wins":wins,"losses":losses,
+                          "stake":led.get("stake_per_position",100),
+                          "created":led.get("created","")[:10]}}
+
+# ---- track record: scored resolved forecasts ----
+SCORES=ROOT/"data"/"forecasts"/"resolved_scores.jsonl"
+track=[json.loads(l) for l in SCORES.open()] if SCORES.exists() else []
+
 DATA_JSON=json.dumps(data,separators=(",",":"))
 MONTHS_JSON=json.dumps(sorted(months.items()))
 STATS_JSON=json.dumps(stats)
+PORT_JSON=json.dumps(portfolio,separators=(",",":"))
+TRACK_JSON=json.dumps(track,separators=(",",":"))
 
 HTML = r"""<title>Company-KPI open markets</title>
 <style>
@@ -141,6 +182,41 @@ tbody td{padding:10px 12px;border-bottom:1px solid var(--border);vertical-align:
     <button class="toggle" id="tg" aria-label="Toggle theme">Theme</button>
   </div>
   <div class="tiles" id="tiles"></div>
+
+  <div class="panel" id="trackpanel" style="display:none">
+    <h2>Track record &mdash; resolved forecasts</h2>
+    <div class="tblwrap" style="border-radius:10px"><table>
+      <thead><tr>
+        <th>Metric</th><th class="num">ClaudeProphet</th><th class="num">Market</th>
+        <th class="num">Actual</th><th class="num">CP Brier</th><th class="num">Mkt Brier</th><th class="num">Winner</th>
+      </tr></thead>
+      <tbody id="trackbody"></tbody>
+    </table></div>
+    <div class="foot" style="margin-top:10px">
+      Brier scores (lower is better) computed per threshold contract against the settled
+      outcome, market prices taken at the same pre-release snapshot as the forecast.
+    </div>
+  </div>
+
+  <div class="panel" id="portpanel" style="display:none">
+    <h2>Paper portfolio &mdash; tracking, not trading</h2>
+    <div class="tiles" id="porttiles" style="margin-bottom:14px"></div>
+    <div class="tblwrap" style="border-radius:10px"><table>
+      <thead><tr>
+        <th>Side</th><th>Position</th><th class="num">Resolves</th>
+        <th class="num">Entry</th><th class="num">Our P</th><th class="num">Now</th>
+        <th class="num">P&amp;L</th>
+      </tr></thead>
+      <tbody id="portbody"></tbody>
+    </table></div>
+    <div class="foot" style="margin-top:10px">
+      One position per forecasted metric: the contract where ClaudeProphet most
+      disagrees with the market (min 5 pt gap), $__PSTAKE__ paper stake at the mid.
+      P&amp;L is marked to the latest price pull and realizes when markets settle.
+      Paper only &mdash; nothing is traded.
+    </div>
+  </div>
+
   <div class="panel"><h2>Resolutions by month (metrics)</h2><div class="tl" id="tl"></div></div>
   <div class="filters">
     <input type="text" id="q" placeholder="Search company or metric..." aria-label="Search">
@@ -166,7 +242,7 @@ tbody td{padding:10px 12px;border-bottom:1px solid var(--border);vertical-align:
 </div>
 
 <script>
-const DATA=__DATA__, MONTHS=__MONTHS__, STATS=__STATS__;
+const DATA=__DATA__, MONTHS=__MONTHS__, STATS=__STATS__, PORT=__PORT__, TRACK=__TRACK__;
 const root=document.documentElement;
 function setTheme(t){root.setAttribute('data-theme',t);try{localStorage.setItem('kpi-theme',t);}catch(e){}}
 (function(){let s=null;try{s=localStorage.getItem('kpi-theme');}catch(e){}setTheme(s||(matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light'));})();
@@ -181,6 +257,50 @@ document.getElementById('tiles').innerHTML=[
   ['Next resolution',STATS.next,'small'],
 ].map(t=>`<div class="tile ${t[2].includes('hl')?'hl':''}"><div class="lab">${t[0]}</div><div class="val ${t[2].replace('hl','').trim()}">${t[1]}</div></div>`).join('');
 
+if(TRACK.length){
+  document.getElementById('trackpanel').style.display='';
+  const fm=v=>{if(v>=1e9)return (v/1e9).toFixed(2)+'B';if(v>=1e6)return (v/1e6).toFixed(2)+'M';if(v>=1e3)return Math.round(v/1e3)+'K';return String(v);};
+  document.getElementById('trackbody').innerHTML=TRACK.map(t=>{
+    const cpWin=t.brier_cp<t.brier_market;
+    return `<tr>
+      <td><span style="font-weight:500">${t.co}</span> &mdash; ${t.metric}<span class="nc">${t.period}</span></td>
+      <td class="num tnum">${fm(t.cp_median)}</td>
+      <td class="num tnum">${fm(t.market_median)}</td>
+      <td class="num tnum">${t.actual_range}</td>
+      <td class="num tnum" style="font-weight:500;color:${cpWin?'var(--up)':'var(--text)'}">${t.brier_cp.toFixed(3)}</td>
+      <td class="num tnum">${t.brier_market.toFixed(3)}</td>
+      <td class="num" style="font-weight:600;color:${cpWin?'var(--up)':'var(--down)'}">${cpWin?'ClaudeProphet':'Market'}</td>
+    </tr>`;}).join('');
+}
+if(PORT.summary){
+  const s=PORT.summary, tot=s.unrealized+s.realized;
+  const money=v=>(v<0?'-':'+')+'$'+Math.abs(v).toFixed(0);
+  const cls=v=>v>=0?'style="color:var(--up)"':'style="color:var(--down)"';
+  document.getElementById('portpanel').style.display='';
+  document.getElementById('porttiles').innerHTML=[
+    ['Paper P&L',`<span ${cls(tot)}>${money(tot)}</span>`],
+    ['Unrealized',`<span ${cls(s.unrealized)}>${money(s.unrealized)}</span>`],
+    ['Realized',`<span ${cls(s.realized)}>${money(s.realized)}</span>`],
+    ['Deployed','$'+s.deployed.toLocaleString()],
+    ['Open positions',String(s.open)],
+    ['Record',s.wins+s.losses?`${s.wins}W&ndash;${s.losses}L`:'&mdash;','small'],
+  ].map(t=>`<div class="tile"><div class="lab">${t[0]}</div><div class="val ${t[2]||''}" style="font-size:20px">${t[1]}</div></div>`).join('');
+  document.getElementById('portbody').innerHTML=PORT.positions.map(p=>{
+    const sideC=p.side==='YES'?'var(--yes)':'var(--no)';
+    const pnl=p.pnl==null?'<span class="dash">&mdash;</span>':
+      `<span class="tnum" style="color:${p.pnl>=0?'var(--up)':'var(--down)'};font-weight:500">${p.pnl>=0?'+':''}$${p.pnl.toFixed(0)}</span>`;
+    const st=p.status==='resolved'?` <span class="pill" style="background:var(--track);color:var(--muted)">settled ${p.result}</span>`:'';
+    return `<tr>
+      <td><span style="color:${sideC};font-weight:600">${p.side}</span></td>
+      <td><span style="font-weight:500">${p.co}</span> &mdash; ${p.metric}<span class="nc">${p.period}</span>${st}</td>
+      <td class="num tnum">${p.r}</td>
+      <td class="num tnum">${p.entry.toFixed(2)}</td>
+      <td class="num tnum">${p.cp_p.toFixed(2)}</td>
+      <td class="num tnum">${p.cur==null?'&mdash;':p.cur.toFixed(2)}</td>
+      <td class="num">${pnl}</td>
+    </tr>`;
+  }).join('');
+}
 const maxM=Math.max(...MONTHS.map(m=>m[1]));
 document.getElementById('tl').innerHTML=MONTHS.map(([mo,n])=>`<div class="tlrow"><span class="mo tnum">${mo}</span><div class="tlbar" style="width:${Math.max(2,Math.round(n/maxM*100))}%"></div><span class="n tnum">${n}</span></div>`).join('');
 document.getElementById('mo').innerHTML='<option value="">All months</option>'+MONTHS.map(([mo])=>`<option value="${mo}">${mo}</option>`).join('');
@@ -240,6 +360,9 @@ q.oninput=view;mo.onchange=view;lv.onchange=view;fo.onchange=view;view();
 </script>"""
 
 html=(HTML.replace("__DATA__",DATA_JSON).replace("__MONTHS__",MONTHS_JSON)
-          .replace("__STATS__",STATS_JSON).replace("__SNAP__",SNAP))
+          .replace("__STATS__",STATS_JSON).replace("__PORT__",PORT_JSON)
+          .replace("__TRACK__",TRACK_JSON)
+          .replace("__PSTAKE__",str(int(portfolio["summary"]["stake"]) if portfolio.get("summary") else 100))
+          .replace("__SNAP__",SNAP))
 OUT.write_text(html,encoding="utf-8")
 print(f"wrote {OUT} ({len(html)} bytes) | metrics={stats['metrics']} forecasts={stats['forecasts']}")
