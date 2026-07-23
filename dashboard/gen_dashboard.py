@@ -62,7 +62,7 @@ stats={"markets":len(rows),"metrics":len(data),"companies":len(companies),"live"
 # ---- paper portfolio: mark open positions to the latest pull ----
 price_by_ticker={r["ticker"]:r.get("yes_mid") for r in rows}
 PORT_PATH=ROOT/"data"/"portfolio.json"
-portfolio={"positions":[],"summary":None}
+portfolio={"positions":[],"summary":None,"pnl_curve":[]}
 if PORT_PATH.exists():
     led=json.loads(PORT_PATH.read_text())
     pos_out=[]; unreal=0.0; realized=0.0; wins=0; losses=0; deployed=0.0
@@ -86,7 +86,16 @@ if PORT_PATH.exists():
                 unreal+=row["pnl"]
         pos_out.append(row)
     pos_out.sort(key=lambda x:(x["status"]!="resolved", -(abs(x["pnl"]) if x["pnl"] is not None else -1)))
-    portfolio={"positions":pos_out,
+    # cumulative realized-P&L equity curve: $0 start, one step per settled position
+    resolved_sorted=sorted((p for p in led["positions"] if p["status"]=="resolved"),
+                           key=lambda p:(p.get("resolved_date",""), -abs(p.get("realized_pnl") or 0)))
+    cum=0.0
+    pnl_curve=[{"date":led.get("created","")[:10],"co":"start","pnl":0.0,"cum":0.0}]
+    for p in resolved_sorted:
+        cum+=p.get("realized_pnl") or 0.0
+        pnl_curve.append({"date":p.get("resolved_date",""),"co":p["co"],"metric":p["metric"],
+                          "pnl":round(p.get("realized_pnl") or 0.0,2),"cum":round(cum,2)})
+    portfolio={"positions":pos_out,"pnl_curve":pnl_curve,
                "summary":{"deployed":round(deployed,2),"unrealized":round(unreal,2),
                           "realized":round(realized,2),
                           "open":sum(1 for x in pos_out if x["status"]=="open"),
@@ -201,6 +210,10 @@ tbody td{padding:10px 12px;border-bottom:1px solid var(--border);vertical-align:
   <div class="panel" id="portpanel" style="display:none">
     <h2>Paper portfolio &mdash; tracking, not trading</h2>
     <div class="tiles" id="porttiles" style="margin-bottom:14px"></div>
+    <div id="pnlwrap" style="display:none;margin-bottom:16px">
+      <div class="lab" style="margin-bottom:6px">Cumulative realized P&amp;L</div>
+      <div id="pnlchart"></div>
+    </div>
     <div class="tblwrap" style="border-radius:10px"><table>
       <thead><tr>
         <th>Side</th><th>Position</th><th class="num">Resolves</th>
@@ -272,6 +285,34 @@ if(TRACK.length){
       <td class="num" style="font-weight:600;color:${cpWin?'var(--up)':'var(--down)'}">${cpWin?'ClaudeProphet':'Market'}</td>
     </tr>`;}).join('');
 }
+function drawPnl(){
+  const c=(PORT.pnl_curve||[]), host=document.getElementById('pnlchart'), wrap=document.getElementById('pnlwrap');
+  if(!host||!wrap) return;
+  if(c.length<2){ wrap.style.display='none'; return; }
+  const W=760,H=220,padL=52,padR=58,padT=16,padB=30;
+  const n=c.length, xs=c.map((_,i)=>padL+(W-padL-padR)*(n===1?0:i/(n-1)));
+  const cums=c.map(p=>p.cum);
+  let lo=Math.min(0,...cums), hi=Math.max(0,...cums);
+  if(lo===hi){ lo-=1; hi+=1; }
+  const pad=(hi-lo)*0.14; lo-=pad; hi+=pad;
+  const y=v=>padT+(H-padT-padB)*(1-(v-lo)/(hi-lo));
+  const line=xs.map((x,i)=>(i?'L':'M')+x.toFixed(1)+' '+y(cums[i]).toFixed(1)).join(' ');
+  const y0=y(0), fin=cums[n-1], col=fin>=0?'var(--up)':'var(--down)';
+  const fmt=v=>(v<0?'-$':'+$')+Math.abs(v).toFixed(0);
+  const area=line+` L ${xs[n-1].toFixed(1)} ${y0.toFixed(1)} L ${xs[0].toFixed(1)} ${y0.toFixed(1)} Z`;
+  const dots=c.map((p,i)=> i===0?'':`<circle cx="${xs[i].toFixed(1)}" cy="${y(p.cum).toFixed(1)}" r="3.5" fill="${col}"><title>${p.date} — ${p.co}: ${fmt(p.pnl)} (running ${fmt(p.cum)})</title></circle>`).join('');
+  const svg=`<svg viewBox="0 0 ${W} ${H}" width="100%" style="display:block;height:auto" role="img" aria-label="Cumulative realized P&L, ${fmt(fin)}">
+    <line x1="${padL}" y1="${y0.toFixed(1)}" x2="${W-padR}" y2="${y0.toFixed(1)}" stroke="var(--border-strong)" stroke-dasharray="3 4"/>
+    <text x="${padL-8}" y="${y0.toFixed(1)}" text-anchor="end" dominant-baseline="middle" fill="var(--faint)" font-size="11" font-family="var(--mono)">$0</text>
+    <path d="${area}" fill="${col}" fill-opacity="0.11"/>
+    <path d="${line}" fill="none" stroke="${col}" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+    ${dots}
+    <text x="${(W-padR+8)}" y="${y(fin).toFixed(1)}" dominant-baseline="middle" fill="${col}" font-size="12.5" font-weight="600" font-family="var(--mono)">${fmt(fin)}</text>
+    <text x="${xs[0].toFixed(1)}" y="${H-9}" text-anchor="start" fill="var(--faint)" font-size="11" font-family="var(--mono)">${c[0].date}</text>
+    <text x="${xs[n-1].toFixed(1)}" y="${H-9}" text-anchor="end" fill="var(--faint)" font-size="11" font-family="var(--mono)">${c[n-1].date}</text>
+  </svg>`;
+  host.innerHTML=svg; wrap.style.display='';
+}
 if(PORT.summary){
   const s=PORT.summary, tot=s.unrealized+s.realized;
   const money=v=>(v<0?'-':'+')+'$'+Math.abs(v).toFixed(0);
@@ -285,6 +326,7 @@ if(PORT.summary){
     ['Open positions',String(s.open)],
     ['Record',s.wins+s.losses?`${s.wins}W&ndash;${s.losses}L`:'&mdash;','small'],
   ].map(t=>`<div class="tile"><div class="lab">${t[0]}</div><div class="val ${t[2]||''}" style="font-size:20px">${t[1]}</div></div>`).join('');
+  drawPnl();
   document.getElementById('portbody').innerHTML=PORT.positions.map(p=>{
     const sideC=p.side==='YES'?'var(--yes)':'var(--no)';
     const pnl=p.pnl==null?'<span class="dash">&mdash;</span>':
