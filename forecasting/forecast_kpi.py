@@ -1,5 +1,7 @@
 import json, subprocess, re, math, os, pathlib
+from datetime import date
 
+TODAY = date.today().isoformat()
 BASE = pathlib.Path(__file__).resolve().parents[1] / "data" / "forecasts"
 chosen = json.load(open(BASE/"_chosen.json"))
 def ncdf(x): return 0.5*(1+math.erf(x/math.sqrt(2)))
@@ -10,7 +12,7 @@ env.pop("ANTHROPIC_API_KEY", None); env.pop("ANTHROPIC_AUTH_TOKEN", None)
 outp = BASE/"open_kpi_claudeprophet.jsonl"
 with outp.open("a") as out:
     for c in chosen:
-        prompt = f"""You are ClaudeProphet, a live forecasting agent. Today is 2026-07-21.
+        prompt = f"""You are ClaudeProphet, a live forecasting agent. Today is {TODAY}.
 Forecast {c['co']}'s reported "{c['metric']}" for {c['period']}, which will be reported around {c['resolves']}.
 Use web search to find: the most recent company guidance, current analyst/consensus estimates, the prior-quarter and year-ago actual for THIS metric, and the recent growth trend. Then give a calibrated distribution for the figure that will actually be reported.
 The market's current implied central estimate is about {c['market_median']:,.0f} — do NOT just copy it; form your own view and note where you differ.
