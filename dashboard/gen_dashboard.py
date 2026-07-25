@@ -30,6 +30,25 @@ if FCST.exists():
             "reason": r.get("reasoning",""), "evidence": r.get("evidence",[]),
         }
 
+# FutureSearch forecasts, keyed exactly like fdict so each metric row can show
+# FutureSearch alongside ClaudeProphet and the market. Populated by
+# `npm run futuresearch:forecast`; absent/empty until then (cells show "-").
+FS_FCST = ROOT / "data" / "forecasts" / "open_kpi_futuresearch.jsonl"
+fsdict = {}
+if FS_FCST.exists():
+    for line in FS_FCST.open():
+        line = line.strip()
+        if not line: continue
+        r = json.loads(line)
+        thr = r.get("fs_thresholds") or []
+        if not thr: continue
+        key = (r["co"].lower(), r["metric"].lower(), r["period"], r["resolves"])
+        fsdict[key] = {
+            "fs_thr": {round(t["t"]): t["fs_p"] for t in thr},
+            "fs_lad": [(float(t["t"]), t["fs_p"]) for t in thr],
+            "fs_reason": r.get("fs_rationale") or "",
+        }
+
 groups = group_markets(rows)
 
 def market_url(ticker: str):
@@ -59,14 +78,17 @@ for (co,metric,period,r), g in groups.items():
     imp=implied_median(ladder); med=None; medop=""
     if imp: medop,medv=imp; med=fmtv(medv)
     fc = fdict.get((co.lower(), metric.lower(), period, r))
+    fs = fsdict.get((co.lower(), metric.lower(), period, r))
     lad_disp=[]
     for v,p in sorted(ladder):
         e={"t":fmtv(v),"tv":v,"p":p}
         if fc and round(v) in fc["cp_thr"]: e["cp"]=fc["cp_thr"][round(v)]
+        if fs and round(v) in fs["fs_thr"]: e["fs"]=fs["fs_thr"][round(v)]
         lad_disp.append(e)
     rec={"co":co,"metric":metric if period else (co+" KPI"),"period":period,"r":r,
          "n":len(mk),"v":vol,"med":med,"medop":medop,"lad":lad_disp,
          "cp":None,"edge":None,"reason":None,"cprange":None,
+         "fs":None,"fs_op":None,"fs_reason":None,
          "bet":bet_by_key.get((co.lower(), metric.lower(), period, r))}
     if fc and imp:
         nf+=1
@@ -74,6 +96,11 @@ for (co,metric,period,r), g in groups.items():
         rec["cprange"]=fmtv(fc["cp_p10"])+" .. "+fmtv(fc["cp_p90"])
         rec["reason"]=fc["reason"]
         rec["edge"]=round((fc["cp_median"]-medv)/medv*100,1) if medv else None
+    if fs:
+        imp_fs=implied_median(fs["fs_lad"])
+        if imp_fs:
+            rec["fs_op"],fsv=imp_fs; rec["fs"]=fmtv(fsv)
+        rec["fs_reason"]=fs["fs_reason"]
     data.append(rec)
 
 total_metrics=len(data)
@@ -138,11 +165,99 @@ if PORT_PATH.exists():
 SCORES=ROOT/"data"/"forecasts"/"resolved_scores.jsonl"
 track=[json.loads(l) for l in SCORES.open()] if SCORES.exists() else []
 
+# ===== Polymarket parallel track (separate files; never touches Kalshi data) =====
+from collections import defaultdict as _dd
+PM_OPEN=ROOT/"data"/"polymarket_kpi_open.jsonl"
+PM_FCST=ROOT/"data"/"forecasts"/"open_pm_claudeprophet.jsonl"
+PM_LEDG=ROOT/"data"/"pm_portfolio.json"
+
+pm_rows=[json.loads(l) for l in PM_OPEN.open()] if PM_OPEN.exists() else []
+pm_fc={}
+if PM_FCST.exists():
+    for l in PM_FCST.open():
+        r=json.loads(l)
+        if "cp_median" in r or "cp_p" in r:
+            pm_fc[(r["co"],r["metric"],r["period"])]=r
+
+pm_groups=_dd(list)
+for r in pm_rows: pm_groups[(r["company"],r["metric"],r["period"])].append(r)
+
+pm_data=[]
+for (co,metric,period),rs in pm_groups.items():
+    kind=rs[0]["outcome_kind"]; url=rs[0].get("market_url",""); close=(rs[0].get("close_time") or "")[:10]
+    fc=pm_fc.get((co,metric,period))
+    row={"co":co,"metric":metric,"period":period,"kind":kind,"close":close,"url":url,
+         "market":"","our":"","edge":None,"edge_disp":"","reason":"","lad":[],"side":None}
+    if kind=="binary":
+        mid=rs[0].get("yes_mid")
+        row["market"]=f"{mid:.0%}" if mid is not None else ""
+        if fc and "cp_p" in fc:
+            cp=fc["cp_p"]; row["our"]=f"{cp:.0%}"; row["reason"]=fc.get("reasoning","")
+            if mid is not None:
+                e=(cp-mid)*100; row["edge"]=round(e,1); row["edge_disp"]=f"{'+' if e>=0 else ''}{e:.0f} pts"
+    else:
+        ladder=[(r["threshold"],r["yes_mid"]) for r in rs if r.get("threshold") is not None and r.get("yes_mid") is not None]
+        imp=implied_median(ladder)
+        if imp: row["market"]=("≈ " if imp[0]=="~" else imp[0]+" ")+fmtv(imp[1])
+        cp_thr={round(t["t"]):t["cp_p"] for t in (fc.get("cp_thresholds",[]) if fc else [])}
+        row["lad"]=[{"t":fmtv(t),"p":p,"cp":cp_thr.get(round(t))} for t,p in sorted(ladder)]
+        if fc and "cp_median" in fc:
+            row["our"]="≈ "+fmtv(fc["cp_median"]); row["reason"]=fc.get("reasoning","")
+            if imp and imp[0]=="~" and imp[1]:
+                e=(fc["cp_median"]-imp[1])/imp[1]*100; row["edge"]=round(e,1); row["edge_disp"]=f"{'+' if e>=0 else ''}{e:.1f}%"
+    pm_data.append(row)
+pm_data.sort(key=lambda d:(d["our"]=="", d["close"] or "9999", d["co"]))
+
+# PM paper portfolio, marked to the latest pull (mirrors the Kalshi portfolio shape)
+pm_price={}
+for r in pm_rows:
+    k=(r["company"],r["metric"],r["period"],"BIN" if r["outcome_kind"]=="binary" else (round(r["threshold"]) if r.get("threshold") is not None else None))
+    pm_price[k]=r.get("yes_mid")
+pm_portfolio={"positions":[],"summary":None,"pnl_curve":[]}
+if PM_LEDG.exists():
+    pled=json.loads(PM_LEDG.read_text()); ppos=[]; punreal=preal=pdep=0.0; pwins=ploss=0
+    for p in pled["positions"]:
+        k=(p["co"],p["metric"],p["period"],"BIN" if p["kind"]=="binary" else (round(p["threshold"]) if p.get("threshold") is not None else None))
+        cy=pm_price.get(k)
+        prow={"co":p["co"],"metric":p["metric"],"period":p["period"],"r":(p.get("resolves") or (p.get("market_url") and "") or ""),
+              "side":p["side"],"entry":p["entry_price"],"cp_p":p["cp_p"],"status":p["status"],
+              "result":p.get("result"),"pnl":None,"cur":None,"url":p.get("market_url")}
+        if p["status"]=="resolved":
+            preal+=p["realized_pnl"] or 0.0; prow["pnl"]=p["realized_pnl"]
+            if (p["realized_pnl"] or 0)>0: pwins+=1
+            else: ploss+=1
+        else:
+            pdep+=p["stake"]
+            if cy is not None:
+                cur=cy if p["side"]=="YES" else round(1-cy,3)
+                prow["cur"]=cur; prow["pnl"]=round(p["contracts"]*(cur-p["entry_price"]),2); punreal+=prow["pnl"]
+        ppos.append(prow)
+    ppos.sort(key=lambda x:(x["status"]!="resolved",-(abs(x["pnl"]) if x["pnl"] is not None else -1)))
+    pres=sorted((p for p in pled["positions"] if p["status"]=="resolved"),
+                key=lambda p:(p.get("resolved_date",""),-abs(p.get("realized_pnl") or 0)))
+    pcum=0.0; pcurve=[{"date":pled.get("created","")[:10],"co":"start","pnl":0.0,"cum":0.0}]
+    for p in pres:
+        pcum+=p.get("realized_pnl") or 0.0
+        pcurve.append({"date":p.get("resolved_date",""),"co":p["co"],"pnl":round(p.get("realized_pnl") or 0.0,2),"cum":round(pcum,2)})
+    pm_portfolio={"positions":ppos,"pnl_curve":pcurve,
+                  "summary":{"deployed":round(pdep,2),"unrealized":round(punreal,2),"realized":round(preal,2),
+                             "open":sum(1 for x in ppos if x["status"]=="open"),"wins":pwins,"losses":ploss,
+                             "stake":pled.get("stake_per_position",0),"created":pled.get("created","")[:10]}}
+
+pm_stats={"shown":len(pm_data),"ladders":sum(1 for d in pm_data if d["kind"]!="binary"),
+          "binaries":sum(1 for d in pm_data if d["kind"]=="binary"),
+          "forecasted":sum(1 for d in pm_data if d["our"]),
+          "positions":len(pm_portfolio["positions"]),
+          "next":min((d["close"] for d in pm_data if d["close"]),default="-")}
+
 DATA_JSON=json.dumps(data,separators=(",",":"))
 MONTHS_JSON=json.dumps(sorted(months.items()))
 STATS_JSON=json.dumps(stats)
 PORT_JSON=json.dumps(portfolio,separators=(",",":"))
 TRACK_JSON=json.dumps(track,separators=(",",":"))
+PM_DATA_JSON=json.dumps(pm_data,separators=(",",":"))
+PM_PORT_JSON=json.dumps(pm_portfolio,separators=(",",":"))
+PM_STATS_JSON=json.dumps(pm_stats)
 
 HTML = r"""<title>Company-KPI open markets</title>
 <style>
@@ -159,6 +274,11 @@ HTML = r"""<title>Company-KPI open markets</title>
 :root[data-theme="light"]{--bg:#f4f6f7;--surface:#ffffff;--surface-2:#fbfcfc;--border:#e3e7ea;--border-strong:#cfd5da;
 --text:#161b1f;--muted:#5f6b73;--faint:#8a949b;--accent:#0d9488;--accent-weak:#d6f0ec;
 --yes:#15803d;--no:#c2410c;--track:#eef1f2;--up:#0f766e;--down:#b45309;--up-bg:#d6f0ec;--down-bg:#fbebd2;}
+/* FutureSearch accent (violet), theme-aware; data-theme wins over the media query. */
+:root{--fs:#7c3aed}
+@media (prefers-color-scheme:dark){:root{--fs:#a78bfa}}
+:root[data-theme="dark"]{--fs:#a78bfa}
+:root[data-theme="light"]{--fs:#7c3aed}
 *{box-sizing:border-box}
 .wrap{font-family:var(--font);color:var(--text);background:var(--bg);padding:22px;max-width:1180px;margin:0 auto;font-size:14px;line-height:1.5}
 .tnum{font-variant-numeric:tabular-nums;font-family:var(--mono)}
@@ -205,13 +325,15 @@ tbody td{padding:10px 12px;border-bottom:1px solid var(--border);vertical-align:
 .reason b{color:var(--text);font-weight:500}
 .ladtitle{color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.05em;margin:2px 0 8px}
 .lad{display:flex;flex-direction:column;gap:4px;max-width:560px}
-.ladrow{display:grid;grid-template-columns:118px 1fr 38px 38px;align-items:center;gap:9px;font-size:12px}
+.ladrow{display:grid;grid-template-columns:118px 1fr 38px 38px 38px;align-items:center;gap:9px;font-size:12px}
 .ladrow.head{color:var(--faint);font-size:10.5px;text-transform:uppercase;letter-spacing:.04em}
 .ladrow .th{text-align:right;color:var(--muted)}
 .ladtrack{height:8px;background:var(--track);border-radius:4px;overflow:hidden;position:relative}
 .ladfill{height:100%;border-radius:4px;position:absolute;top:0;left:0}
 .cptick{position:absolute;top:-2px;width:2px;height:12px;background:var(--accent)}
+.fstick{position:absolute;top:-2px;width:2px;height:12px;background:var(--fs)}
 .ladrow .pm{text-align:right;color:var(--muted)}.ladrow .pc{text-align:right;color:var(--accent);font-weight:500}
+.ladrow .pf{text-align:right;color:var(--fs);font-weight:500}
 .mktlink{color:var(--accent);text-decoration:none;font-weight:500;white-space:nowrap}
 .mktlink:hover{text-decoration:underline}
 .metric .mktlink,.portml{font-size:12px;margin-left:6px}
@@ -262,7 +384,7 @@ padding:11px 14px;margin:0 0 13px;color:var(--text);overflow-x:auto}
 <div class="wrap">
   <div class="top">
     <div><h1>Company-KPI open markets</h1>
-      <div class="sub">Kalshi &middot; only metrics ClaudeProphet has forecast &middot; live research &middot; prices pulled __SNAP__</div></div>
+      <div class="sub">Company reports &amp; KPIs &middot; Kalshi + Polymarket in parallel &middot; live research &middot; prices pulled __SNAP__</div></div>
     <button class="toggle" id="tg" aria-label="Toggle theme">Theme</button>
   </div>
 
@@ -270,7 +392,7 @@ padding:11px 14px;margin:0 0 13px;color:var(--text);overflow-x:auto}
        elements below, so adding a tab = adding ONE section with data-tab + data-tab-label. -->
   <div class="tabs" id="tabs" role="tablist" aria-label="Sections"></div>
 
-  <section class="tabpanel" data-tab="dashboard" data-tab-label="Dashboard" role="tabpanel" tabindex="0">
+  <section class="tabpanel" data-tab="dashboard" data-tab-label="Kalshi" role="tabpanel" tabindex="0">
   <div class="tiles" id="tiles"></div>
 
   <div class="panel" id="trackpanel" style="display:none">
@@ -278,7 +400,7 @@ padding:11px 14px;margin:0 0 13px;color:var(--text);overflow-x:auto}
     <div class="tblwrap" style="border-radius:10px"><table>
       <thead><tr>
         <th>Metric</th><th class="num">ClaudeProphet</th><th class="num">Market</th>
-        <th class="num">Actual</th><th class="num">CP Brier</th><th class="num">Mkt Brier</th><th class="num">Winner</th>
+        <th class="num">Actual</th><th class="num">CP Brier</th><th class="num">Mkt Brier</th><th class="num">FS Brier</th><th class="num">Winner</th>
       </tr></thead>
       <tbody id="trackbody"></tbody>
     </table></div>
@@ -325,12 +447,56 @@ padding:11px 14px;margin:0 0 13px;color:var(--text);overflow-x:auto}
       <th data-k="r" class="sorted">Resolves <span class="ar">&#8593;</span></th>
       <th data-k="med" class="num">Market est. <span class="ar">&#8597;</span></th>
       <th data-k="cp" class="num">ClaudeProphet <span class="ar">&#8597;</span></th>
+      <th data-k="fs" class="num">FutureSearch <span class="ar">&#8597;</span></th>
       <th data-k="edge" class="num">Edge <span class="ar">&#8597;</span></th>
     </tr></thead>
     <tbody id="tb"></tbody>
   </table></div>
   <div class="foot">
-    <b>Market est.</b> = market-implied central value (50% threshold crossing). <b>ClaudeProphet</b> = our live-researched median forecast of the reported figure. <b>Edge</b> = ClaudeProphet vs market, % of the metric. Click a forecasted row for the reasoning and a threshold-by-threshold market-vs-ClaudeProphet comparison.
+    <b>Market est.</b> = market-implied central value (50% threshold crossing). <b>ClaudeProphet</b> = our live-researched median forecast of the reported figure. <b>FutureSearch</b> = the same central value implied by FutureSearch's independent forecast (from <code>npm run futuresearch:forecast</code>; &ldquo;&mdash;&rdquo; until run). <b>Edge</b> = ClaudeProphet vs market, % of the metric. Click a forecasted row for the reasoning and a threshold-by-threshold market-vs-ClaudeProphet-vs-FutureSearch comparison.
+  </div>
+  </section>
+
+  <section class="tabpanel" data-tab="polymarket" data-tab-label="Polymarket" role="tabpanel" tabindex="0" hidden>
+  <div class="tiles" id="pm_tiles"></div>
+  <div class="panel" id="pm_portpanel" style="display:none">
+    <h2>Polymarket paper portfolio &mdash; tracking, not trading</h2>
+    <div class="tiles" id="pm_porttiles" style="margin-bottom:14px"></div>
+    <div id="pm_pnlwrap" style="display:none;margin-bottom:16px">
+      <div class="lab" style="margin-bottom:6px">Cumulative realized P&amp;L</div>
+      <div id="pm_pnlchart"></div>
+    </div>
+    <div class="tblwrap"><table>
+      <thead><tr>
+        <th>Side</th><th>Position</th><th class="num">Resolves</th>
+        <th class="num">Entry</th><th class="num">Our P</th><th class="num">Now</th>
+        <th class="num">P&amp;L</th>
+      </tr></thead>
+      <tbody id="pm_portbody"></tbody>
+    </table></div>
+    <div class="foot" style="margin-top:10px">
+      Same $1,000 paper book and max-divergence rule as the Kalshi track, run in
+      parallel on Polymarket. Ladder metrics bet the widest threshold gap; beats/misses
+      bet the single contract. Marked to the latest Gamma pull; settles via UMA
+      resolution. Paper only &mdash; nothing is traded.
+    </div>
+  </div>
+  <div class="panel">
+    <h2>Polymarket forecasts &mdash; company reports &amp; KPIs</h2>
+    <div class="tblwrap"><table id="pm_ftable">
+      <thead><tr>
+        <th>Company</th><th>Metric</th><th class="num">Resolves</th>
+        <th class="num">Market</th><th class="num">ClaudeProphet</th><th class="num">Edge</th>
+      </tr></thead>
+      <tbody id="pm_tb"></tbody>
+    </table></div>
+    <div class="foot">
+      Polymarket (Gamma API) company-report / KPI markets. Range-bucket events are
+      shown as cumulative thresholds (bucket &rarr; CDF); beats/misses show P(beat).
+      <b>Market</b> = market-implied central value or price; <b>ClaudeProphet</b> = our
+      live-researched forecast; <b>Edge</b> = our view vs the market. Click a forecasted
+      row for reasoning and the threshold ladder. Links open the live Polymarket market.
+    </div>
   </div>
   </section>
 
@@ -771,6 +937,7 @@ padding:11px 14px;margin:0 0 13px;color:var(--text);overflow-x:auto}
 
 <script>
 const DATA=__DATA__, MONTHS=__MONTHS__, STATS=__STATS__, PORT=__PORT__, TRACK=__TRACK__;
+const PM_DATA=__PM_DATA__, PM_PORT=__PM_PORT__, PM_STATS=__PM_STATS__;
 const root=document.documentElement;
 function setTheme(t){root.setAttribute('data-theme',t);try{localStorage.setItem('kpi-theme',t);}catch(e){}}
 (function(){let s=null;try{s=localStorage.getItem('kpi-theme');}catch(e){}setTheme(s||(matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light'));})();
@@ -827,7 +994,10 @@ if(TRACK.length){
   document.getElementById('trackpanel').style.display='';
   const fm=v=>{if(v>=1e9)return (v/1e9).toFixed(2)+'B';if(v>=1e6)return (v/1e6).toFixed(2)+'M';if(v>=1e3)return Math.round(v/1e3)+'K';return String(v);};
   document.getElementById('trackbody').innerHTML=TRACK.map(t=>{
-    const cpWin=t.brier_cp<t.brier_market;
+    const briers=[['ClaudeProphet',t.brier_cp,'var(--up)'],['Market',t.brier_market,'var(--down)']];
+    if(t.brier_fs!=null)briers.push(['FutureSearch',t.brier_fs,'var(--fs)']);
+    const win=briers.slice().sort((a,b)=>a[1]-b[1])[0];
+    const cpWin=win[0]==='ClaudeProphet';
     return `<tr>
       <td><span style="font-weight:500">${t.co}</span> &mdash; ${t.metric}<span class="nc">${t.period}</span></td>
       <td class="num tnum">${fm(t.cp_median)}</td>
@@ -835,11 +1005,13 @@ if(TRACK.length){
       <td class="num tnum">${t.actual_range}</td>
       <td class="num tnum" style="font-weight:500;color:${cpWin?'var(--up)':'var(--text)'}">${t.brier_cp.toFixed(3)}</td>
       <td class="num tnum">${t.brier_market.toFixed(3)}</td>
-      <td class="num" style="font-weight:600;color:${cpWin?'var(--up)':'var(--down)'}">${cpWin?'ClaudeProphet':'Market'}</td>
+      <td class="num tnum" style="color:var(--fs)">${t.brier_fs!=null?t.brier_fs.toFixed(3):'&mdash;'}</td>
+      <td class="num" style="font-weight:600;color:${win[2]}">${win[0]}</td>
     </tr>`;}).join('');
 }
-function drawPnl(){
-  const c=(PORT.pnl_curve||[]), host=document.getElementById('pnlchart'), wrap=document.getElementById('pnlwrap');
+function drawPnlInto(c, hostId, wrapId){
+  const host=document.getElementById(hostId), wrap=document.getElementById(wrapId);
+  c=c||[];
   if(!host||!wrap) return;
   if(c.length<2){ wrap.style.display='none'; return; }
   const W=760,H=220,padL=52,padR=58,padT=16,padB=30;
@@ -866,12 +1038,14 @@ function drawPnl(){
   </svg>`;
   host.innerHTML=svg; wrap.style.display='';
 }
-if(PORT.summary){
-  const s=PORT.summary, tot=s.unrealized+s.realized;
+function renderPortfolio(P, ids){
+  const panel=document.getElementById(ids.panel);
+  if(!P||!P.summary){ if(panel) panel.style.display='none'; return; }
+  const s=P.summary, tot=s.unrealized+s.realized;
   const money=v=>(v<0?'-':'+')+'$'+Math.abs(v).toFixed(0);
   const cls=v=>v>=0?'style="color:var(--up)"':'style="color:var(--down)"';
-  document.getElementById('portpanel').style.display='';
-  document.getElementById('porttiles').innerHTML=[
+  panel.style.display='';
+  document.getElementById(ids.tiles).innerHTML=[
     ['Paper P&L',`<span ${cls(tot)}>${money(tot)}</span>`],
     ['Unrealized',`<span ${cls(s.unrealized)}>${money(s.unrealized)}</span>`],
     ['Realized',`<span ${cls(s.realized)}>${money(s.realized)}</span>`],
@@ -879,22 +1053,70 @@ if(PORT.summary){
     ['Open positions',String(s.open)],
     ['Record',s.wins+s.losses?`${s.wins}W&ndash;${s.losses}L`:'&mdash;','small'],
   ].map(t=>`<div class="tile"><div class="lab">${t[0]}</div><div class="val ${t[2]||''}" style="font-size:20px">${t[1]}</div></div>`).join('');
-  drawPnl();
-  document.getElementById('portbody').innerHTML=PORT.positions.map(p=>{
+  drawPnlInto(P.pnl_curve, ids.chart, ids.wrap);
+  document.getElementById(ids.body).innerHTML=P.positions.map(p=>{
     const sideC=p.side==='YES'?'var(--yes)':'var(--no)';
     const pnl=p.pnl==null?'<span class="dash">&mdash;</span>':
       `<span class="tnum" style="color:${p.pnl>=0?'var(--up)':'var(--down)'};font-weight:500">${p.pnl>=0?'+':''}$${p.pnl.toFixed(0)}</span>`;
     const st=p.status==='resolved'?` <span class="pill" style="background:var(--track);color:var(--muted)">settled ${p.result}</span>`:'';
     return `<tr>
       <td><span style="color:${sideC};font-weight:600">${p.side}</span></td>
-      <td><span style="font-weight:500">${p.co}</span> &mdash; ${p.metric}<span class="nc">${p.period}</span>${st}${p.url?` <a class="portml mktlink" href="${p.url}" target="_blank" rel="noopener" title="Live Kalshi market">&#8599;</a>`:''}</td>
-      <td class="num tnum">${p.r}</td>
+      <td><span style="font-weight:500">${p.co}</span> &mdash; ${p.metric}<span class="nc">${p.period}</span>${st}${p.url?` <a class="portml mktlink" href="${p.url}" target="_blank" rel="noopener" title="Live market">&#8599;</a>`:''}</td>
+      <td class="num tnum">${p.r||''}</td>
       <td class="num tnum">${p.entry.toFixed(2)}</td>
       <td class="num tnum">${p.cp_p.toFixed(2)}</td>
       <td class="num tnum">${p.cur==null?'&mdash;':p.cur.toFixed(2)}</td>
       <td class="num">${pnl}</td>
     </tr>`;
   }).join('');
+}
+renderPortfolio(PORT, {panel:'portpanel',tiles:'porttiles',body:'portbody',chart:'pnlchart',wrap:'pnlwrap'});
+renderPortfolio(typeof PM_PORT!=='undefined'?PM_PORT:null, {panel:'pm_portpanel',tiles:'pm_porttiles',body:'pm_portbody',chart:'pm_pnlchart',wrap:'pm_pnlwrap'});
+// ---- Polymarket tiles + markets table ----
+if(typeof PM_STATS!=='undefined'){
+  const pt=document.getElementById('pm_tiles');
+  if(pt) pt.innerHTML=[
+    ['Metrics',PM_STATS.shown,'hl'],['Ladders',PM_STATS.ladders,''],
+    ['Beats/misses',PM_STATS.binaries,''],['Paper positions',PM_STATS.positions,''],
+    ['Forecasted',PM_STATS.forecasted+' / '+PM_STATS.shown,'small'],
+    ['Next resolution',PM_STATS.next||'—','small'],
+  ].map(t=>`<div class="tile"><div class="lab">${t[0]}</div><div class="val ${t[2]||''}">${t[1]}</div></div>`).join('');
+}
+function pmDetail(d){
+  let h='';
+  if(d.reason) h+=`<div class="reason"><b>ClaudeProphet:</b> ${d.reason}</div>`;
+  if(d.side) h+=`<div class="betline"><span class="bs ${d.side}">${d.side}</span><span>our paper bet &middot; <a class="mktlink" href="${d.url}" target="_blank" rel="noopener">view live market on Polymarket &#8599;</a></span></div>`;
+  if(!d.lad||!d.lad.length) return h||'<div class="ladtitle">binary beat/miss market</div>';
+  h+='<div class="ladtitle">threshold &rarr; P(Yes)</div><div class="lad">';
+  h+=`<div class="ladrow head"><span class="th">threshold</span><span></span><span class="pm">mkt</span><span class="pc">CP</span></div>`;
+  h+=d.lad.map(x=>{const w=x.p==null?0:Math.round(x.p*100);const c=x.p>=0.5?'var(--yes)':'var(--no)';
+    const tick=x.cp!=null?`<span class="cptick" style="left:${Math.round(x.cp*100)}%"></span>`:'';
+    return `<div class="ladrow"><span class="th tnum">&ge; ${x.t}</span><div class="ladtrack"><div class="ladfill" style="width:${w}%;background:${c}"></div>${tick}</div><span class="pm tnum">${x.p==null?'-':w+'%'}</span><span class="pc tnum">${x.cp!=null?Math.round(x.cp*100)+'%':''}</span></div>`;}).join('');
+  return h+'</div>';
+}
+if(typeof PM_DATA!=='undefined'){
+  const pmtb=document.getElementById('pm_tb');
+  if(pmtb){
+    const kindLabel=k=>k==='binary'?'beat/miss':(k==='bucket_cdf'?'buckets':'ladder');
+    pmtb.innerHTML=PM_DATA.map((d,i)=>{
+      const per=d.period?`<span class="per">${d.period}</span>`:'';
+      const link=d.url?` <a class="mktlink" href="${d.url}" target="_blank" rel="noopener" onclick="event.stopPropagation()" title="Live Polymarket market">&#8599;</a>`:'';
+      const edge=d.edge==null?'<span class="dash">&mdash;</span>':`<span class="edge ${d.edge>=0?'up':'down'} tnum">${d.edge_disp}</span>`;
+      const pill=`<span class="pill" style="background:var(--track);color:var(--muted)">${kindLabel(d.kind)}</span>`;
+      return `<tr class="grp ${d.our?'fc':''}" data-pi="${i}">
+        <td class="co"><span class="chev">&#9656;</span> ${d.co}</td>
+        <td class="metric">${d.metric}${per} ${pill}${link}</td>
+        <td class="rd tnum">${d.close||'&mdash;'}</td>
+        <td class="num"><span class="est tnum">${d.market||'&mdash;'}</span></td>
+        <td class="num">${d.our?`<span class="cp tnum">${d.our}</span>`:'<span class="dash">&mdash;</span>'}</td>
+        <td class="num">${edge}</td>
+      </tr>`;}).join('');
+    pmtb.querySelectorAll('.grp').forEach(tr=>{tr.onclick=()=>{
+      const nx=tr.nextElementSibling;
+      if(nx&&nx.classList.contains('detail')){nx.remove();tr.classList.remove('open');return;}
+      tr.classList.add('open');const det=document.createElement('tr');det.className='detail';
+      det.innerHTML=`<td colspan="6">${pmDetail(PM_DATA[tr.dataset.pi])}</td>`;tr.after(det);};});
+  }
 }
 const maxM=Math.max(...MONTHS.map(m=>m[1]));
 document.getElementById('tl').innerHTML=MONTHS.map(([mo,n])=>`<div class="tlrow"><span class="mo tnum">${mo}</span><div class="tlbar" style="width:${Math.max(2,Math.round(n/maxM*100))}%"></div><span class="n tnum">${n}</span></div>`).join('');
@@ -904,18 +1126,21 @@ let sortK='r',sortDir=1;
 const q=document.getElementById('q'),mo=document.getElementById('mo'),lv=document.getElementById('lv'),tb=document.getElementById('tb');
 function est(d){ if(d.med==null)return '<span class="dash">&mdash;</span>'; const op=d.medop==='~'?'&asymp; ':(d.medop+' '); return `<span class="est tnum">${op}${d.med}</span><span class="nc">${d.n}</span>`; }
 function cpCell(d){ return d.cp==null?'<span class="dash">&mdash;</span>':`<span class="cp tnum">&asymp; ${d.cp}</span>`; }
+function fsCell(d){ return d.fs==null?'<span class="dash">&mdash;</span>':`<span class="cp tnum" style="color:var(--fs)">&asymp; ${d.fs}</span>`; }
 function edgeCell(d){ if(d.edge==null)return '<span class="dash">&mdash;</span>'; const c=d.edge>=0?'up':'down'; const s=d.edge>0?'+':''; return `<span class="edge ${c} tnum">${s}${d.edge}%</span>`; }
 function detailHTML(d){
   let h='';
   if(d.reason){h+=`<div class="reason"><b>ClaudeProphet:</b> ${d.reason} <span style="color:var(--faint)">(p10&ndash;p90: ${d.cprange})</span></div>`;}
+  if(d.fs_reason){h+=`<div class="reason"><b style="color:var(--fs)">FutureSearch:</b> ${d.fs_reason}</div>`;}
   if(d.bet){h+=`<div class="betline"><span class="bs ${d.bet.side}">${d.bet.side}</span><span>our paper bet &middot; <a class="mktlink" href="${d.bet.url}" target="_blank" rel="noopener">view live market on Kalshi &#8599;</a></span></div>`;}
   if(!d.lad.length)return h+'<div class="ladtitle">no numeric thresholds</div>';
-  const hasCP=d.lad.some(x=>x.cp!=null);
+  const hasCP=d.lad.some(x=>x.cp!=null), hasFS=d.lad.some(x=>x.fs!=null);
   h+='<div class="ladtitle">threshold &rarr; P(Yes)</div><div class="lad">';
-  h+=`<div class="ladrow head"><span class="th">threshold</span><span></span><span class="pm">mkt</span><span class="pc">${hasCP?'CP':''}</span></div>`;
+  h+=`<div class="ladrow head"><span class="th">threshold</span><span></span><span class="pm">mkt</span><span class="pc">${hasCP?'CP':''}</span><span class="pf">${hasFS?'FS':''}</span></div>`;
   h+=d.lad.map(x=>{const w=x.p==null?0:Math.round(x.p*100);const c=x.p>=0.5?'var(--yes)':'var(--no)';
     const tick=x.cp!=null?`<span class="cptick" style="left:${Math.round(x.cp*100)}%"></span>`:'';
-    return `<div class="ladrow"><span class="th tnum">&ge; ${x.t}</span><div class="ladtrack"><div class="ladfill" style="width:${w}%;background:${c}"></div>${tick}</div><span class="pm tnum">${x.p==null?'-':w+'%'}</span><span class="pc tnum">${x.cp!=null?Math.round(x.cp*100)+'%':''}</span></div>`;}).join('');
+    const ftick=x.fs!=null?`<span class="fstick" style="left:${Math.round(x.fs*100)}%"></span>`:'';
+    return `<div class="ladrow"><span class="th tnum">&ge; ${x.t}</span><div class="ladtrack"><div class="ladfill" style="width:${w}%;background:${c}"></div>${tick}${ftick}</div><span class="pm tnum">${x.p==null?'-':w+'%'}</span><span class="pc tnum">${x.cp!=null?Math.round(x.cp*100)+'%':''}</span><span class="pf tnum">${x.fs!=null?Math.round(x.fs*100)+'%':''}</span></div>`;}).join('');
   return h+'</div>';
 }
 function view(){
@@ -927,6 +1152,7 @@ function view(){
     return true;});
   rows.sort((a,b)=>{let x,y;
     if(sortK==='cp'){x=a.d.cp==null?-1:parseFloat(a.d.cp);y=b.d.cp==null?-1:parseFloat(b.d.cp);}
+    else if(sortK==='fs'){x=a.d.fs==null?-1:parseFloat(a.d.fs);y=b.d.fs==null?-1:parseFloat(b.d.fs);}
     else if(sortK==='edge'){x=a.d.edge==null?-999:a.d.edge;y=b.d.edge==null?-999:b.d.edge;}
     else if(sortK==='med'){x=a.d.med==null?-1:parseFloat(a.d.med);y=b.d.med==null?-1:parseFloat(b.d.med);}
     else{x=a.d[sortK];y=b.d[sortK];}
@@ -939,13 +1165,14 @@ function view(){
       <td class="rd tnum">${d.r}</td>
       <td class="num">${est(d)}</td>
       <td class="num">${cpCell(d)}</td>
+      <td class="num">${fsCell(d)}</td>
       <td class="num">${edgeCell(d)}</td>
     </tr>`;}).join('');
   tb.querySelectorAll('.grp').forEach(tr=>{tr.onclick=()=>{
     const nx=tr.nextElementSibling;
     if(nx&&nx.classList.contains('detail')){nx.remove();tr.classList.remove('open');return;}
     tr.classList.add('open');const det=document.createElement('tr');det.className='detail';
-    det.innerHTML=`<td colspan="6">${detailHTML(DATA[tr.dataset.i])}</td>`;tr.after(det);};});
+    det.innerHTML=`<td colspan="7">${detailHTML(DATA[tr.dataset.i])}</td>`;tr.after(det);};});
 }
 document.querySelectorAll('#ftable thead th').forEach(th=>{th.onclick=()=>{const k=th.dataset.k;
   if(!k)return;
@@ -977,6 +1204,8 @@ function makeSortable(table){
 html=(HTML.replace("__DATA__",DATA_JSON).replace("__MONTHS__",MONTHS_JSON)
           .replace("__STATS__",STATS_JSON).replace("__PORT__",PORT_JSON)
           .replace("__TRACK__",TRACK_JSON)
+          .replace("__PM_DATA__",PM_DATA_JSON).replace("__PM_PORT__",PM_PORT_JSON)
+          .replace("__PM_STATS__",PM_STATS_JSON)
           .replace("__PSTAKE__",str(int(portfolio["summary"]["stake"]) if portfolio.get("summary") else 100))
           .replace("__SNAP__",SNAP))
 OUT.write_text(html,encoding="utf-8")
