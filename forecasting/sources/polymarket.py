@@ -206,9 +206,15 @@ class PolymarketSource:
                 # a different resolution model — out of KPI scope, see scope doc).
                 if re.search(r"\bsay(s)?\b.*\b(earnings|call)\b|earnings call", title, re.I):
                     continue
-                # keep only company-report-looking events (a ticker or a period present)
-                if not (re.search(r"\([A-Z]{1,6}\)", title) or _period(title)
-                        or re.search(r"\b(earnings|revenue|deliveries|subscribers|sales)\b", title, re.I)):
+                # Require a company ticker AND a financial-KPI signal. This is the
+                # production filter: it drops non-company noise (creators, product
+                # releases, off-topic) that a looser ticker-OR-keyword filter let in.
+                has_ticker = bool(re.search(r"\([A-Z]{1,6}\)", title))
+                has_kpi = bool(re.search(
+                    r"\b(earnings|revenue|deliver(y|ies|ed)?|subscribers?|sales|"
+                    r"units|users|gross|volume|eps|guidance|shipments?|bookings?|"
+                    r"margin|growth|accounts?|stores?)\b", title, re.I))
+                if not (has_ticker and has_kpi):
                     continue
                 seen[str(e.get("id") or e.get("slug"))] = e
         return list(seen.values())
