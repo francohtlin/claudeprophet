@@ -20,7 +20,8 @@ OUT = Path(__file__).resolve().parents[1] / "data" / "polymarket_kpi_open.jsonl"
 
 
 def main() -> int:
-    src = PolymarketSource()
+    # Company earnings only (beat/miss), not the revenue/deliveries KPI ladders.
+    src = PolymarketSource(earnings_only=True)
     rows = src.discover()
     rows.sort(key=lambda r: (r.get("close_time") or "", r.get("company") or ""))
     OUT.parent.mkdir(parents=True, exist_ok=True)

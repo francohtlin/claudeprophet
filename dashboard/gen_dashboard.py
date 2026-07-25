@@ -482,20 +482,19 @@ padding:11px 14px;margin:0 0 13px;color:var(--text);overflow-x:auto}
     </div>
   </div>
   <div class="panel">
-    <h2>Polymarket forecasts &mdash; company reports &amp; KPIs</h2>
+    <h2>Polymarket forecasts &mdash; company earnings (beat / miss)</h2>
     <div class="tblwrap"><table id="pm_ftable">
       <thead><tr>
-        <th>Company</th><th>Metric</th><th class="num">Resolves</th>
-        <th class="num">Market</th><th class="num">ClaudeProphet</th><th class="num">Edge</th>
+        <th>Company</th><th>Market</th><th class="num">Resolves</th>
+        <th class="num">Mkt P(beat)</th><th class="num">Our P(beat)</th><th class="num">Edge</th>
       </tr></thead>
       <tbody id="pm_tb"></tbody>
     </table></div>
     <div class="foot">
-      Polymarket (Gamma API) company-report / KPI markets. Range-bucket events are
-      shown as cumulative thresholds (bucket &rarr; CDF); beats/misses show P(beat).
-      <b>Market</b> = market-implied central value or price; <b>ClaudeProphet</b> = our
-      live-researched forecast; <b>Edge</b> = our view vs the market. Click a forecasted
-      row for reasoning and the threshold ladder. Links open the live Polymarket market.
+      Polymarket (Gamma API) &ldquo;will &lt;company&gt; beat quarterly earnings?&rdquo; markets.
+      <b>Mkt P(beat)</b> = market price; <b>Our P(beat)</b> = our live-researched probability;
+      <b>Edge</b> = our view vs the market (percentage points). We bet the side we most disagree
+      with the market on. Click a forecasted row for the reasoning. Links open the live Polymarket market.
     </div>
   </div>
   </section>
@@ -1076,9 +1075,9 @@ renderPortfolio(typeof PM_PORT!=='undefined'?PM_PORT:null, {panel:'pm_portpanel'
 if(typeof PM_STATS!=='undefined'){
   const pt=document.getElementById('pm_tiles');
   if(pt) pt.innerHTML=[
-    ['Metrics',PM_STATS.shown,'hl'],['Ladders',PM_STATS.ladders,''],
-    ['Beats/misses',PM_STATS.binaries,''],['Paper positions',PM_STATS.positions,''],
-    ['Forecasted',PM_STATS.forecasted+' / '+PM_STATS.shown,'small'],
+    ['Earnings markets',PM_STATS.shown,'hl'],
+    ['Forecasted',PM_STATS.forecasted+' / '+PM_STATS.shown,''],
+    ['Paper positions',PM_STATS.positions,''],
     ['Next resolution',PM_STATS.next||'—','small'],
   ].map(t=>`<div class="tile"><div class="lab">${t[0]}</div><div class="val ${t[2]||''}">${t[1]}</div></div>`).join('');
 }

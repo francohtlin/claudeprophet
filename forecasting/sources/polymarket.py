@@ -183,10 +183,13 @@ class PolymarketSource:
     name = "polymarket"
 
     def __init__(self, *, terms: list[str] | None = None, per_term: int = 15,
-                 include_closed: bool = False):
+                 include_closed: bool = False, earnings_only: bool = False):
         self.terms = terms or KPI_TERMS
         self.per_term = per_term
         self.include_closed = include_closed
+        # earnings_only: keep just the "beat quarterly earnings" binary markets,
+        # dropping the revenue/deliveries/growth KPI ladders and buckets.
+        self.earnings_only = earnings_only
         self.debug: dict[str, Any] = {"events": 0, "skipped_malformed": 0, "by_shape": {}}
 
     def _discover_events(self) -> list[dict]:
@@ -215,6 +218,10 @@ class PolymarketSource:
                     r"units|users|gross|volume|eps|guidance|shipments?|bookings?|"
                     r"margin|growth|accounts?|stores?)\b", title, re.I))
                 if not (has_ticker and has_kpi):
+                    continue
+                if self.earnings_only and not (
+                    re.search(r"\bearnings\b", title, re.I)
+                    and re.search(r"\b(beat|miss|quarterly)\b", title, re.I)):
                     continue
                 seen[str(e.get("id") or e.get("slug"))] = e
         return list(seen.values())
