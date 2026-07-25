@@ -450,11 +450,11 @@ padding:11px 14px;margin:0 0 13px;color:var(--text);overflow-x:auto}
       <div id="pnlchart"></div>
     </div>
     <div class="foot" style="margin-top:2px">
-      $1,000 paper bankroll split equally across open positions: one bet per
-      forecasted metric, on the contract where ClaudeProphet (live research) most
-      disagrees with the market (min 5 pt gap), entered at the mid. Each bet &mdash;
-      side, entry, current price and P&amp;L &mdash; is shown in its row in the forecasts
-      table below. Paper only &mdash; nothing is traded.
+      Flat $1 per bet: one bet per forecasted metric, on the contract where
+      ClaudeProphet (live research) most disagrees with the market (min 5 pt gap),
+      entered at the mid ($1 buys 1/entry contracts). Each bet &mdash; side, entry,
+      current price and P&amp;L &mdash; is shown in its row in the forecasts table
+      below. Paper only &mdash; nothing is traded.
     </div>
   </div>
 
@@ -493,7 +493,7 @@ padding:11px 14px;margin:0 0 13px;color:var(--text);overflow-x:auto}
       <div id="pm_pnlchart"></div>
     </div>
     <div class="foot" style="margin-top:2px">
-      Same $1,000 paper book and max-divergence rule as the Kalshi track, run in
+      Same flat-$1-per-bet, max-divergence rule as the Kalshi track, run in
       parallel on Polymarket &mdash; here on company earnings: we bet the beat/miss
       contract where our P(beat) most disagrees with the market (min 5 pt gap).
       Each bet is shown in its row in the forecasts table below. Marked to the latest

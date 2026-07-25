@@ -26,6 +26,7 @@ FCST = ROOT / "data" / "forecasts" / "open_pm_claudeprophet.jsonl"
 LEDGER = ROOT / "data" / "pm_portfolio.json"
 
 BANKROLL = 1000.0
+STAKE = 1.0            # flat $1 per bet
 MIN_EDGE = 0.05
 PRICE_BAND = (0.03, 0.97)
 
@@ -104,10 +105,9 @@ def cmd_init(args) -> int:
     if LEDGER.exists() and not args.force:
         print(f"{LEDGER} exists; use --force to rebuild.")
         return 1
-    positions = _positions_for(load_forecasts(), load_markets())
-    per = positions[0]["stake"] if positions else 0.0
+    positions = _positions_for(load_forecasts(), load_markets(), stake=STAKE)
     LEDGER.write_text(json.dumps({"created": now_iso(), "bankroll": BANKROLL,
-                                  "stake_per_position": per, "min_edge": MIN_EDGE,
+                                  "stake_per_position": STAKE, "min_edge": MIN_EDGE,
                                   "positions": positions}, indent=2) + "\n")
     print(f"opened {len(positions)} PM paper positions (${sum(p['stake'] for p in positions):,.0f}) -> {LEDGER}")
     for p in positions:
@@ -117,24 +117,24 @@ def cmd_init(args) -> int:
 
 
 def _rebalance(ledger: dict) -> float:
-    """Equal-weight the bankroll across open positions so total deployed never
-    exceeds BANKROLL. Resolved positions keep their settled economics."""
-    open_pos = [p for p in ledger["positions"] if p["status"] == "open"]
-    per = round(BANKROLL / len(open_pos), 2) if open_pos else 0.0
-    for p in open_pos:
-        p["stake"] = per
-        p["contracts"] = round(per / p["entry_price"], 2) if p["entry_price"] else 0.0
-    ledger["stake_per_position"] = per
-    return per
+    """Put every bet on a flat $1 stake (contracts = $1 / entry_price); recompute
+    resolved realized P&L on the $1 basis."""
+    for p in ledger["positions"]:
+        p["stake"] = STAKE
+        p["contracts"] = round(STAKE / p["entry_price"], 2) if p.get("entry_price") else 0.0
+        if p["status"] == "resolved" and p.get("result") in ("yes", "no"):
+            won = (p["result"] == "yes") == (p["side"] == "YES")
+            p["realized_pnl"] = round(p["contracts"] * (1.0 if won else 0.0) - STAKE, 2)
+    ledger["stake_per_position"] = STAKE
+    return STAKE
 
 
 def cmd_rebalance(args) -> int:
     ledger = json.loads(LEDGER.read_text())
-    per = _rebalance(ledger)
+    _rebalance(ledger)
     LEDGER.write_text(json.dumps(ledger, indent=2) + "\n")
     n = sum(1 for p in ledger["positions"] if p["status"] == "open")
-    print(f"rebalanced {n} open PM positions to ${per:.2f} each "
-          f"(${per*n:,.2f} of ${BANKROLL:,.0f} bankroll)")
+    print(f"resized all PM bets to a flat ${STAKE:.0f} ({n} open, ${n*STAKE:,.0f} deployed)")
     return 0
 
 

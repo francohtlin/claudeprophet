@@ -1,7 +1,7 @@
 {
   "created": "2026-07-25T11:29:20+00:00",
   "bankroll": 1000.0,
-  "stake_per_position": 500.0,
+  "stake_per_position": 1.0,
   "min_edge": 0.05,
   "positions": [
     {
@@ -17,8 +17,8 @@
       "cp_p": 0.52,
       "entry_yes_mid": 0.79,
       "entry_price": 0.21,
-      "stake": 500.0,
-      "contracts": 2380.95,
+      "stake": 1.0,
+      "contracts": 4.76,
       "entry_date": "2026-07-25",
       "source": "polymarket",
       "status": "open",
@@ -38,8 +38,8 @@
       "cp_p": 0.87,
       "entry_yes_mid": 0.945,
       "entry_price": 0.055,
-      "stake": 500.0,
-      "contracts": 9090.91,
+      "stake": 1.0,
+      "contracts": 18.18,
       "entry_date": "2026-07-25",
       "source": "polymarket",
       "status": "open",

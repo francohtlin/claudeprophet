@@ -24,7 +24,8 @@ from forecasting.kpi_metrics import FORECASTS, OPEN_MARKETS, parse
 ROOT = Path(__file__).resolve().parents[1]
 LEDGER = ROOT / "data" / "portfolio.json"
 
-BANKROLL = 1000.0      # paper bankroll; split equally across positions at build
+BANKROLL = 1000.0      # notional paper bankroll (a cap; flat $1 stakes stay well under)
+STAKE = 1.0            # flat $1 per bet
 MIN_EDGE = 0.05        # only trade contracts where |our_p - market_mid| >= 5 pts
 PRICE_BAND = (0.03, 0.97)  # skip near-settled tails
 
@@ -101,27 +102,25 @@ def _open_positions_for(forecasts: list[dict], markets: list[dict],
 
 
 def _rebalance(ledger: dict) -> float:
-    """Equal-weight the bankroll across currently-open positions so total
-    deployed never exceeds BANKROLL. Resizes each open position's stake and
-    contracts in place; resolved positions keep their settled economics.
-    Returns the new per-position stake."""
-    open_pos = [p for p in ledger["positions"] if p["status"] == "open"]
-    per = round(BANKROLL / len(open_pos), 2) if open_pos else 0.0
-    for p in open_pos:
-        p["stake"] = per
-        p["contracts"] = round(per / p["entry_price"], 2) if p["entry_price"] else 0.0
-    ledger["stake_per_position"] = per
-    return per
+    """Put every bet on a flat $1 stake: contracts = $1 / entry_price. Resolved
+    bets also get realized P&L recomputed on the $1 basis so the whole book is
+    uniform."""
+    for p in ledger["positions"]:
+        p["stake"] = STAKE
+        p["contracts"] = round(STAKE / p["entry_price"], 2) if p.get("entry_price") else 0.0
+        if p["status"] == "resolved" and p.get("result") in ("yes", "no"):
+            won = (p["result"] == "yes") == (p["side"] == "YES")
+            p["realized_pnl"] = round(p["contracts"] * (1.0 if won else 0.0) - STAKE, 2)
+    ledger["stake_per_position"] = STAKE
+    return STAKE
 
 
 def cmd_rebalance(args) -> int:
     ledger = json.loads(LEDGER.read_text())
-    per = _rebalance(ledger)
+    _rebalance(ledger)
     LEDGER.write_text(json.dumps(ledger, indent=2) + "\n")
-    dep = sum(p["stake"] for p in ledger["positions"] if p["status"] == "open")
     n = sum(1 for p in ledger["positions"] if p["status"] == "open")
-    print(f"rebalanced {n} open positions to ${per:.2f} each "
-          f"(${dep:,.2f} deployed of ${BANKROLL:,.0f} bankroll)")
+    print(f"resized all bets to a flat ${STAKE:.0f} ({n} open, ${n*STAKE:,.0f} deployed)")
     return 0
 
 
@@ -129,10 +128,9 @@ def cmd_init(args) -> int:
     if LEDGER.exists() and not args.force:
         print(f"{LEDGER} exists; use --force to rebuild from scratch.")
         return 1
-    positions = _open_positions_for(load_forecasts(), load_open_markets())
-    per = positions[0]["stake"] if positions else 0.0
+    positions = _open_positions_for(load_forecasts(), load_open_markets(), stake=STAKE)
     ledger = {"created": now_iso(), "bankroll": BANKROLL,
-              "stake_per_position": per,
+              "stake_per_position": STAKE,
               "min_edge": MIN_EDGE, "positions": positions}
     LEDGER.write_text(json.dumps(ledger, indent=2) + "\n")
     dep = sum(p["stake"] for p in positions)
