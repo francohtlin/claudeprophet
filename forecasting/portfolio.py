@@ -100,6 +100,31 @@ def _open_positions_for(forecasts: list[dict], markets: list[dict],
     return positions
 
 
+def _rebalance(ledger: dict) -> float:
+    """Equal-weight the bankroll across currently-open positions so total
+    deployed never exceeds BANKROLL. Resizes each open position's stake and
+    contracts in place; resolved positions keep their settled economics.
+    Returns the new per-position stake."""
+    open_pos = [p for p in ledger["positions"] if p["status"] == "open"]
+    per = round(BANKROLL / len(open_pos), 2) if open_pos else 0.0
+    for p in open_pos:
+        p["stake"] = per
+        p["contracts"] = round(per / p["entry_price"], 2) if p["entry_price"] else 0.0
+    ledger["stake_per_position"] = per
+    return per
+
+
+def cmd_rebalance(args) -> int:
+    ledger = json.loads(LEDGER.read_text())
+    per = _rebalance(ledger)
+    LEDGER.write_text(json.dumps(ledger, indent=2) + "\n")
+    dep = sum(p["stake"] for p in ledger["positions"] if p["status"] == "open")
+    n = sum(1 for p in ledger["positions"] if p["status"] == "open")
+    print(f"rebalanced {n} open positions to ${per:.2f} each "
+          f"(${dep:,.2f} deployed of ${BANKROLL:,.0f} bankroll)")
+    return 0
+
+
 def cmd_init(args) -> int:
     if LEDGER.exists() and not args.force:
         print(f"{LEDGER} exists; use --force to rebuild from scratch.")
@@ -124,9 +149,11 @@ def cmd_add(args) -> int:
     added = _open_positions_for(new_fc, load_open_markets(),
                                 stake=ledger.get("stake_per_position") or None)
     ledger["positions"].extend(added)
+    _rebalance(ledger)  # keep total deployed within the bankroll
     LEDGER.write_text(json.dumps(ledger, indent=2) + "\n")
     print(f"added {len(added)} new positions (from {len(new_fc)} new forecasts); "
-          f"ledger now {len(ledger['positions'])} positions")
+          f"ledger now {len(ledger['positions'])} positions; "
+          f"rebalanced to ${ledger['stake_per_position']:.2f}/position")
     for p in added:
         print(f"  {p['side']:3} {p['co']} — {p['metric']} @ {p['entry_price']:.2f} "
               f"(our p={p['cp_p']:.2f}, mkt={p['entry_yes_mid']:.2f})")
@@ -173,8 +200,10 @@ def main() -> int:
     ip = sub.add_parser("init"); ip.add_argument("--force", action="store_true")
     sub.add_parser("add")
     sub.add_parser("mark")
+    sub.add_parser("rebalance")
     args = ap.parse_args()
-    return {"init": cmd_init, "add": cmd_add, "mark": cmd_mark}[args.cmd](args)
+    return {"init": cmd_init, "add": cmd_add, "mark": cmd_mark,
+            "rebalance": cmd_rebalance}[args.cmd](args)
 
 
 if __name__ == "__main__":
