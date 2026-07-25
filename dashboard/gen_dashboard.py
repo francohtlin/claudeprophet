@@ -167,88 +167,88 @@ track=[json.loads(l) for l in SCORES.open()] if SCORES.exists() else []
 
 # ===== Polymarket parallel track (separate files; never touches Kalshi data) =====
 from collections import defaultdict as _dd
-PM_OPEN=ROOT/"data"/"polymarket_kpi_open.jsonl"
-PM_FCST=ROOT/"data"/"forecasts"/"open_pm_claudeprophet.jsonl"
-PM_LEDG=ROOT/"data"/"pm_portfolio.json"
 
-pm_rows=[json.loads(l) for l in PM_OPEN.open()] if PM_OPEN.exists() else []
-pm_fc={}
-if PM_FCST.exists():
-    for l in PM_FCST.open():
-        r=json.loads(l)
-        if "cp_median" in r or "cp_p" in r:
-            pm_fc[(r["co"],r["metric"],r["period"])]=r
-
-pm_groups=_dd(list)
-for r in pm_rows: pm_groups[(r["company"],r["metric"],r["period"])].append(r)
-
-pm_data=[]
-for (co,metric,period),rs in pm_groups.items():
-    kind=rs[0]["outcome_kind"]; url=rs[0].get("market_url",""); close=(rs[0].get("close_time") or "")[:10]
-    fc=pm_fc.get((co,metric,period))
-    row={"co":co,"metric":metric,"period":period,"kind":kind,"close":close,"url":url,
-         "market":"","our":"","edge":None,"edge_disp":"","reason":"","lad":[],"side":None}
-    if kind=="binary":
-        mid=rs[0].get("yes_mid")
-        row["market"]=f"{mid:.0%}" if mid is not None else ""
-        if fc and "cp_p" in fc:
-            cp=fc["cp_p"]; row["our"]=f"{cp:.0%}"; row["reason"]=fc.get("reasoning","")
-            if mid is not None:
-                e=(cp-mid)*100; row["edge"]=round(e,1); row["edge_disp"]=f"{'+' if e>=0 else ''}{e:.0f} pts"
-    else:
-        ladder=[(r["threshold"],r["yes_mid"]) for r in rs if r.get("threshold") is not None and r.get("yes_mid") is not None]
-        imp=implied_median(ladder)
-        if imp: row["market"]=("≈ " if imp[0]=="~" else imp[0]+" ")+fmtv(imp[1])
-        cp_thr={round(t["t"]):t["cp_p"] for t in (fc.get("cp_thresholds",[]) if fc else [])}
-        row["lad"]=[{"t":fmtv(t),"p":p,"cp":cp_thr.get(round(t))} for t,p in sorted(ladder)]
-        if fc and "cp_median" in fc:
-            row["our"]="≈ "+fmtv(fc["cp_median"]); row["reason"]=fc.get("reasoning","")
-            if imp and imp[0]=="~" and imp[1]:
-                e=(fc["cp_median"]-imp[1])/imp[1]*100; row["edge"]=round(e,1); row["edge_disp"]=f"{'+' if e>=0 else ''}{e:.1f}%"
-    pm_data.append(row)
-pm_data.sort(key=lambda d:(d["our"]=="", d["close"] or "9999", d["co"]))
-
-# PM paper portfolio, marked to the latest pull (mirrors the Kalshi portfolio shape)
-pm_price={}
-for r in pm_rows:
-    k=(r["company"],r["metric"],r["period"],"BIN" if r["outcome_kind"]=="binary" else (round(r["threshold"]) if r.get("threshold") is not None else None))
-    pm_price[k]=r.get("yes_mid")
-pm_portfolio={"positions":[],"summary":None,"pnl_curve":[]}
-if PM_LEDG.exists():
-    pled=json.loads(PM_LEDG.read_text()); ppos=[]; punreal=preal=pdep=0.0; pwins=ploss=0
-    for p in pled["positions"]:
-        k=(p["co"],p["metric"],p["period"],"BIN" if p["kind"]=="binary" else (round(p["threshold"]) if p.get("threshold") is not None else None))
-        cy=pm_price.get(k)
-        prow={"co":p["co"],"metric":p["metric"],"period":p["period"],"r":(p.get("resolves") or (p.get("market_url") and "") or ""),
-              "side":p["side"],"entry":p["entry_price"],"cp_p":p["cp_p"],"status":p["status"],
-              "result":p.get("result"),"pnl":None,"cur":None,"url":p.get("market_url")}
-        if p["status"]=="resolved":
-            preal+=p["realized_pnl"] or 0.0; prow["pnl"]=p["realized_pnl"]
-            if (p["realized_pnl"] or 0)>0: pwins+=1
-            else: ploss+=1
+def build_pm_track(open_path, fcst_path, ledg_path):
+    """Build (data, portfolio, stats) for one Polymarket track from its files."""
+    pm_rows=[json.loads(l) for l in open_path.open()] if open_path.exists() else []
+    pm_fc={}
+    if fcst_path.exists():
+        for l in fcst_path.open():
+            r=json.loads(l)
+            if "cp_median" in r or "cp_p" in r:
+                pm_fc[(r["co"],r["metric"],r["period"])]=r
+    pm_groups=_dd(list)
+    for r in pm_rows: pm_groups[(r["company"],r["metric"],r["period"])].append(r)
+    pm_data=[]
+    for (co,metric,period),rs in pm_groups.items():
+        kind=rs[0]["outcome_kind"]; url=rs[0].get("market_url",""); close=(rs[0].get("close_time") or "")[:10]
+        fc=pm_fc.get((co,metric,period))
+        row={"co":co,"metric":metric,"period":period,"kind":kind,"close":close,"url":url,
+             "market":"","our":"","edge":None,"edge_disp":"","reason":"","lad":[],"side":None}
+        if kind=="binary":
+            mid=rs[0].get("yes_mid")
+            row["market"]=f"{mid:.0%}" if mid is not None else ""
+            if fc and "cp_p" in fc:
+                cp=fc["cp_p"]; row["our"]=f"{cp:.0%}"; row["reason"]=fc.get("reasoning","")
+                if mid is not None:
+                    e=(cp-mid)*100; row["edge"]=round(e,1); row["edge_disp"]=f"{'+' if e>=0 else ''}{e:.0f} pts"
         else:
-            pdep+=p["stake"]
-            if cy is not None:
-                cur=cy if p["side"]=="YES" else round(1-cy,3)
-                prow["cur"]=cur; prow["pnl"]=round(p["contracts"]*(cur-p["entry_price"]),2); punreal+=prow["pnl"]
-        ppos.append(prow)
-    ppos.sort(key=lambda x:(x["status"]!="resolved",-(abs(x["pnl"]) if x["pnl"] is not None else -1)))
-    pres=sorted((p for p in pled["positions"] if p["status"]=="resolved"),
-                key=lambda p:(p.get("resolved_date",""),-abs(p.get("realized_pnl") or 0)))
-    pcum=0.0; pcurve=[{"date":pled.get("created","")[:10],"co":"start","pnl":0.0,"cum":0.0}]
-    for p in pres:
-        pcum+=p.get("realized_pnl") or 0.0
-        pcurve.append({"date":p.get("resolved_date",""),"co":p["co"],"pnl":round(p.get("realized_pnl") or 0.0,2),"cum":round(pcum,2)})
-    pm_portfolio={"positions":ppos,"pnl_curve":pcurve,
-                  "summary":{"deployed":round(pdep,2),"unrealized":round(punreal,2),"realized":round(preal,2),
-                             "open":sum(1 for x in ppos if x["status"]=="open"),"wins":pwins,"losses":ploss,
-                             "stake":pled.get("stake_per_position",0),"created":pled.get("created","")[:10]}}
+            ladder=[(r["threshold"],r["yes_mid"]) for r in rs if r.get("threshold") is not None and r.get("yes_mid") is not None]
+            imp=implied_median(ladder)
+            if imp: row["market"]=("≈ " if imp[0]=="~" else imp[0]+" ")+fmtv(imp[1])
+            cp_thr={round(t["t"]):t["cp_p"] for t in (fc.get("cp_thresholds",[]) if fc else [])}
+            row["lad"]=[{"t":fmtv(t),"p":p,"cp":cp_thr.get(round(t))} for t,p in sorted(ladder)]
+            if fc and "cp_median" in fc:
+                row["our"]="≈ "+fmtv(fc["cp_median"]); row["reason"]=fc.get("reasoning","")
+                if imp and imp[0]=="~" and imp[1]:
+                    e=(fc["cp_median"]-imp[1])/imp[1]*100; row["edge"]=round(e,1); row["edge_disp"]=f"{'+' if e>=0 else ''}{e:.1f}%"
+        pm_data.append(row)
+    pm_data.sort(key=lambda d:(d["our"]=="", d["close"] or "9999", d["co"]))
+    pm_price={}
+    for r in pm_rows:
+        k=(r["company"],r["metric"],r["period"],"BIN" if r["outcome_kind"]=="binary" else (round(r["threshold"]) if r.get("threshold") is not None else None))
+        pm_price[k]=r.get("yes_mid")
+    pm_portfolio={"positions":[],"summary":None,"pnl_curve":[]}
+    if ledg_path.exists():
+        pled=json.loads(ledg_path.read_text()); ppos=[]; punreal=preal=pdep=0.0; pwins=ploss=0
+        for p in pled["positions"]:
+            k=(p["co"],p["metric"],p["period"],"BIN" if p["kind"]=="binary" else (round(p["threshold"]) if p.get("threshold") is not None else None))
+            cy=pm_price.get(k)
+            prow={"co":p["co"],"metric":p["metric"],"period":p["period"],"r":(p.get("resolves") or ""),
+                  "side":p["side"],"entry":p["entry_price"],"cp_p":p["cp_p"],"status":p["status"],
+                  "result":p.get("result"),"pnl":None,"cur":None,"url":p.get("market_url")}
+            if p["status"]=="resolved":
+                preal+=p["realized_pnl"] or 0.0; prow["pnl"]=p["realized_pnl"]
+                if (p["realized_pnl"] or 0)>0: pwins+=1
+                else: ploss+=1
+            else:
+                pdep+=p["stake"]
+                if cy is not None:
+                    cur=cy if p["side"]=="YES" else round(1-cy,3)
+                    prow["cur"]=cur; prow["pnl"]=round(p["contracts"]*(cur-p["entry_price"]),2); punreal+=prow["pnl"]
+            ppos.append(prow)
+        ppos.sort(key=lambda x:(x["status"]!="resolved",-(abs(x["pnl"]) if x["pnl"] is not None else -1)))
+        pres=sorted((p for p in pled["positions"] if p["status"]=="resolved"),
+                    key=lambda p:(p.get("resolved_date",""),-abs(p.get("realized_pnl") or 0)))
+        pcum=0.0; pcurve=[{"date":pled.get("created","")[:10],"co":"start","pnl":0.0,"cum":0.0}]
+        for p in pres:
+            pcum+=p.get("realized_pnl") or 0.0
+            pcurve.append({"date":p.get("resolved_date",""),"co":p["co"],"pnl":round(p.get("realized_pnl") or 0.0,2),"cum":round(pcum,2)})
+        pm_portfolio={"positions":ppos,"pnl_curve":pcurve,
+                      "summary":{"deployed":round(pdep,2),"unrealized":round(punreal,2),"realized":round(preal,2),
+                                 "open":sum(1 for x in ppos if x["status"]=="open"),"wins":pwins,"losses":ploss,
+                                 "stake":pled.get("stake_per_position",0),"created":pled.get("created","")[:10]}}
+    pm_stats={"shown":len(pm_data),"ladders":sum(1 for d in pm_data if d["kind"]!="binary"),
+              "binaries":sum(1 for d in pm_data if d["kind"]=="binary"),
+              "forecasted":sum(1 for d in pm_data if d["our"]),
+              "positions":len(pm_portfolio["positions"]),
+              "next":min((d["close"] for d in pm_data if d["close"]),default="-")}
+    return pm_data, pm_portfolio, pm_stats
 
-pm_stats={"shown":len(pm_data),"ladders":sum(1 for d in pm_data if d["kind"]!="binary"),
-          "binaries":sum(1 for d in pm_data if d["kind"]=="binary"),
-          "forecasted":sum(1 for d in pm_data if d["our"]),
-          "positions":len(pm_portfolio["positions"]),
-          "next":min((d["close"] for d in pm_data if d["close"]),default="-")}
+pm_data, pm_portfolio, pm_stats = build_pm_track(
+    ROOT/"data"/"polymarket_kpi_open.jsonl", ROOT/"data"/"forecasts"/"open_pm_claudeprophet.jsonl", ROOT/"data"/"pm_portfolio.json")
+pmk_data, pmk_portfolio, pmk_stats = build_pm_track(
+    ROOT/"data"/"polymarket_kpis_open.jsonl", ROOT/"data"/"forecasts"/"open_pmkpi_claudeprophet.jsonl", ROOT/"data"/"pmkpi_portfolio.json")
 
 # ---- combined table: attach full bet detail to each forecast row, and append
 # any settled/held bets whose market has left the open feed so none are lost ----
@@ -273,14 +273,18 @@ for p in _merge_bets(data, portfolio["positions"],
                  "bet": {"url": p.get("url"), "side": p["side"], "entry": p.get("entry"),
                          "cur": p.get("cur"), "pnl": p.get("pnl"), "status": p["status"], "result": p.get("result")}})
 
-for p in _merge_bets(pm_data, pm_portfolio["positions"],
-                     lambda p: (p["co"].lower(), p["metric"].lower(), p["period"]),
-                     lambda d: (d["co"].lower(), d["metric"].lower(), d["period"])):
-    pm_data.append({"co": p["co"], "metric": p["metric"], "period": p["period"], "kind": "binary",
-                    "close": p.get("r", ""), "url": p.get("url"), "market": "", "our": "", "edge": None,
-                    "edge_disp": "", "reason": "", "lad": [], "off_feed": True,
-                    "bet": {"url": p.get("url"), "side": p["side"], "entry": p.get("entry"),
-                            "cur": p.get("cur"), "pnl": p.get("pnl"), "status": p["status"], "result": p.get("result")}})
+def _merge_pm_bets(rows, positions):
+    for p in _merge_bets(rows, positions,
+                         lambda p: (p["co"].lower(), p["metric"].lower(), p["period"]),
+                         lambda d: (d["co"].lower(), d["metric"].lower(), d["period"])):
+        rows.append({"co": p["co"], "metric": p["metric"], "period": p["period"],
+                     "kind": p.get("kind", "binary"), "close": p.get("r", ""), "url": p.get("url"),
+                     "market": "", "our": "", "edge": None, "edge_disp": "", "reason": "", "lad": [],
+                     "off_feed": True,
+                     "bet": {"url": p.get("url"), "side": p["side"], "entry": p.get("entry"),
+                             "cur": p.get("cur"), "pnl": p.get("pnl"), "status": p["status"], "result": p.get("result")}})
+_merge_pm_bets(pm_data, pm_portfolio["positions"])
+_merge_pm_bets(pmk_data, pmk_portfolio["positions"])
 
 DATA_JSON=json.dumps(data,separators=(",",":"))
 MONTHS_JSON=json.dumps(sorted(months.items()))
@@ -290,6 +294,9 @@ TRACK_JSON=json.dumps(track,separators=(",",":"))
 PM_DATA_JSON=json.dumps(pm_data,separators=(",",":"))
 PM_PORT_JSON=json.dumps(pm_portfolio,separators=(",",":"))
 PM_STATS_JSON=json.dumps(pm_stats)
+PMK_DATA_JSON=json.dumps(pmk_data,separators=(",",":"))
+PMK_PORT_JSON=json.dumps(pmk_portfolio,separators=(",",":"))
+PMK_STATS_JSON=json.dumps(pmk_stats)
 
 HTML = r"""<title>Company-KPI open markets</title>
 <style>
@@ -483,7 +490,7 @@ padding:11px 14px;margin:0 0 13px;color:var(--text);overflow-x:auto}
   </div>
   </section>
 
-  <section class="tabpanel" data-tab="polymarket" data-tab-label="Polymarket" role="tabpanel" tabindex="0" hidden>
+  <section class="tabpanel" data-tab="polymarket" data-tab-label="Polymarket earnings" role="tabpanel" tabindex="0" hidden>
   <div class="tiles" id="pm_tiles"></div>
   <div class="panel" id="pm_portpanel" style="display:none">
     <h2>Polymarket paper portfolio &mdash; tracking, not trading</h2>
@@ -515,6 +522,42 @@ padding:11px 14px;margin:0 0 13px;color:var(--text);overflow-x:auto}
       <b>Mkt P(beat)</b> = market price; <b>Our P(beat)</b> = our live-researched probability;
       <b>Edge</b> = our view vs the market (percentage points). We bet the side we most disagree
       with the market on. Click a forecasted row for the reasoning. Links open the live Polymarket market.
+    </div>
+  </div>
+  </section>
+
+  <section class="tabpanel" data-tab="pmkpis" data-tab-label="Polymarket KPIs" role="tabpanel" tabindex="0" hidden>
+  <div class="tiles" id="pmk_tiles"></div>
+  <div class="panel" id="pmk_portpanel" style="display:none">
+    <h2>Polymarket KPI paper portfolio &mdash; tracking, not trading</h2>
+    <div class="tiles" id="pmk_porttiles" style="margin-bottom:14px"></div>
+    <div id="pmk_pnlwrap" style="display:none;margin-bottom:16px">
+      <div class="lab" style="margin-bottom:6px">Cumulative realized P&amp;L</div>
+      <div id="pmk_pnlchart"></div>
+    </div>
+    <div class="foot" style="margin-top:2px">
+      Same flat-$1-per-bet, max-divergence rule as the other books, run in parallel
+      on Polymarket company-KPI markets (revenue, deliveries, growth). Range-bucket
+      events are converted to cumulative thresholds (bucket &rarr; CDF); we bet the
+      threshold contract where ClaudeProphet most disagrees with the market. Each bet
+      is shown in its row below. Settles via UMA resolution. Paper only &mdash; nothing is traded.
+    </div>
+  </div>
+  <div class="panel">
+    <h2>Polymarket forecasts &mdash; company KPIs</h2>
+    <div class="tblwrap"><table id="pmk_ftable">
+      <thead><tr>
+        <th>Company</th><th>Metric</th><th class="num">Resolves</th>
+        <th class="num">Market est.</th><th class="num">ClaudeProphet</th><th class="num">Edge</th>
+        <th>Bet</th><th class="num">Entry</th><th class="num">Now</th><th class="num">P&amp;L</th>
+      </tr></thead>
+      <tbody id="pmk_tb"></tbody>
+    </table></div>
+    <div class="foot">
+      Polymarket (Gamma API) company-KPI markets &mdash; revenue, deliveries, growth, GMV.
+      <b>Market est.</b> = market-implied central value; <b>ClaudeProphet</b> = our
+      live-researched forecast of the figure; <b>Edge</b> = our view vs the market.
+      Click a forecasted row for the reasoning and the threshold ladder. Links open the live market.
     </div>
   </div>
   </section>
@@ -957,6 +1000,7 @@ padding:11px 14px;margin:0 0 13px;color:var(--text);overflow-x:auto}
 <script>
 const DATA=__DATA__, MONTHS=__MONTHS__, STATS=__STATS__, PORT=__PORT__, TRACK=__TRACK__;
 const PM_DATA=__PM_DATA__, PM_PORT=__PM_PORT__, PM_STATS=__PM_STATS__;
+const PMK_DATA=__PMK_DATA__, PMK_PORT=__PMK_PORT__, PMK_STATS=__PMK_STATS__;
 const root=document.documentElement;
 function setTheme(t){root.setAttribute('data-theme',t);try{localStorage.setItem('kpi-theme',t);}catch(e){}}
 (function(){let s=null;try{s=localStorage.getItem('kpi-theme');}catch(e){}setTheme(s||(matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light'));})();
@@ -1093,21 +1137,25 @@ function renderPortfolio(P, ids){
 }
 renderPortfolio(PORT, {panel:'portpanel',tiles:'porttiles',body:'portbody',chart:'pnlchart',wrap:'pnlwrap'});
 renderPortfolio(typeof PM_PORT!=='undefined'?PM_PORT:null, {panel:'pm_portpanel',tiles:'pm_porttiles',body:'pm_portbody',chart:'pm_pnlchart',wrap:'pm_pnlwrap'});
-// ---- Polymarket tiles + markets table ----
-if(typeof PM_STATS!=='undefined'){
-  const pt=document.getElementById('pm_tiles');
-  if(pt) pt.innerHTML=[
-    ['Earnings markets',PM_STATS.shown,'hl'],
-    ['Forecasted',PM_STATS.forecasted+' / '+PM_STATS.shown,''],
-    ['Paper positions',PM_STATS.positions,''],
-    ['Next resolution',PM_STATS.next||'—','small'],
+renderPortfolio(typeof PMK_PORT!=='undefined'?PMK_PORT:null, {panel:'pmk_portpanel',tiles:'pmk_porttiles',body:'pmk_portbody',chart:'pmk_pnlchart',wrap:'pmk_pnlwrap'});
+// ---- Polymarket tiles + markets tables (shared by the earnings and KPI tracks) ----
+function renderPmTiles(stats, tilesId, primaryLabel){
+  const pt=document.getElementById(tilesId);
+  if(!pt||!stats) return;
+  pt.innerHTML=[
+    [primaryLabel,stats.shown,'hl'],
+    ['Forecasted',stats.forecasted+' / '+stats.shown,''],
+    ['Paper positions',stats.positions,''],
+    ['Next resolution',stats.next||'—','small'],
   ].map(t=>`<div class="tile"><div class="lab">${t[0]}</div><div class="val ${t[2]||''}">${t[1]}</div></div>`).join('');
 }
+renderPmTiles(typeof PM_STATS!=='undefined'?PM_STATS:null,'pm_tiles','Earnings markets');
+renderPmTiles(typeof PMK_STATS!=='undefined'?PMK_STATS:null,'pmk_tiles','KPI metrics');
 function pmDetail(d){
   let h='';
   if(d.reason) h+=`<div class="reason"><b>ClaudeProphet:</b> ${d.reason}</div>`;
   if(d.bet&&d.bet.side) h+=`<div class="betline"><span class="bs ${d.bet.side}">${d.bet.side}</span><span>our paper bet &middot; <a class="mktlink" href="${d.bet.url||d.url}" target="_blank" rel="noopener">view live market on Polymarket &#8599;</a></span></div>`;
-  if(!d.lad||!d.lad.length) return h||'<div class="ladtitle">binary beat/miss market</div>';
+  if(!d.lad||!d.lad.length) return h||'<div class="ladtitle">single binary market</div>';
   h+='<div class="ladtitle">threshold &rarr; P(Yes)</div><div class="lad">';
   h+=`<div class="ladrow head"><span class="th">threshold</span><span></span><span class="pm">mkt</span><span class="pc">CP</span></div>`;
   h+=d.lad.map(x=>{const w=x.p==null?0:Math.round(x.p*100);const c=x.p>=0.5?'var(--yes)':'var(--no)';
@@ -1115,31 +1163,32 @@ function pmDetail(d){
     return `<div class="ladrow"><span class="th tnum">&ge; ${x.t}</span><div class="ladtrack"><div class="ladfill" style="width:${w}%;background:${c}"></div>${tick}</div><span class="pm tnum">${x.p==null?'-':w+'%'}</span><span class="pc tnum">${x.cp!=null?Math.round(x.cp*100)+'%':''}</span></div>`;}).join('');
   return h+'</div>';
 }
-if(typeof PM_DATA!=='undefined'){
-  const pmtb=document.getElementById('pm_tb');
-  if(pmtb){
-    const kindLabel=k=>k==='binary'?'beat/miss':(k==='bucket_cdf'?'buckets':'ladder');
-    pmtb.innerHTML=PM_DATA.map((d,i)=>{
-      const per=d.period?`<span class="per">${d.period}</span>`:'';
-      const link=d.url?` <a class="mktlink" href="${d.url}" target="_blank" rel="noopener" onclick="event.stopPropagation()" title="Live Polymarket market">&#8599;</a>`:'';
-      const edge=d.edge==null?'<span class="dash">&mdash;</span>':`<span class="edge ${d.edge>=0?'up':'down'} tnum">${d.edge_disp}</span>`;
-      const pill=`<span class="pill" style="background:var(--track);color:var(--muted)">${kindLabel(d.kind)}</span>`;
-      return `<tr class="grp ${d.our?'fc':''}" data-pi="${i}">
-        <td class="co"><span class="chev">&#9656;</span> ${d.co}</td>
-        <td class="metric">${d.metric}${per} ${pill}${link}</td>
-        <td class="rd tnum">${d.close||'&mdash;'}</td>
-        <td class="num"><span class="est tnum">${d.market||'&mdash;'}</span></td>
-        <td class="num">${d.our?`<span class="cp tnum">${d.our}</span>`:'<span class="dash">&mdash;</span>'}</td>
-        <td class="num">${edge}</td>
-        ${betCells(d)}
-      </tr>`;}).join('');
-    pmtb.querySelectorAll('.grp').forEach(tr=>{tr.onclick=()=>{
-      const nx=tr.nextElementSibling;
-      if(nx&&nx.classList.contains('detail')){nx.remove();tr.classList.remove('open');return;}
-      tr.classList.add('open');const det=document.createElement('tr');det.className='detail';
-      det.innerHTML=`<td colspan="10">${pmDetail(PM_DATA[tr.dataset.pi])}</td>`;tr.after(det);};});
-  }
+function renderPmTable(rows, tbodyId){
+  const pmtb=document.getElementById(tbodyId);
+  if(!pmtb||!rows) return;
+  const kindLabel=k=>k==='binary'?'beat/miss':(k==='bucket_cdf'?'buckets':'ladder');
+  pmtb.innerHTML=rows.map((d,i)=>{
+    const per=d.period?`<span class="per">${d.period}</span>`:'';
+    const link=d.url?` <a class="mktlink" href="${d.url}" target="_blank" rel="noopener" onclick="event.stopPropagation()" title="Live Polymarket market">&#8599;</a>`:'';
+    const edge=d.edge==null?'<span class="dash">&mdash;</span>':`<span class="edge ${d.edge>=0?'up':'down'} tnum">${d.edge_disp}</span>`;
+    const pill=`<span class="pill" style="background:var(--track);color:var(--muted)">${kindLabel(d.kind)}</span>`;
+    return `<tr class="grp ${d.our?'fc':''}" data-pi="${i}">
+      <td class="co"><span class="chev">&#9656;</span> ${d.co}</td>
+      <td class="metric">${d.metric}${per} ${pill}${link}</td>
+      <td class="rd tnum">${d.close||'&mdash;'}</td>
+      <td class="num"><span class="est tnum">${d.market||'&mdash;'}</span></td>
+      <td class="num">${d.our?`<span class="cp tnum">${d.our}</span>`:'<span class="dash">&mdash;</span>'}</td>
+      <td class="num">${edge}</td>
+      ${betCells(d)}
+    </tr>`;}).join('');
+  pmtb.querySelectorAll('.grp').forEach(tr=>{tr.onclick=()=>{
+    const nx=tr.nextElementSibling;
+    if(nx&&nx.classList.contains('detail')){nx.remove();tr.classList.remove('open');return;}
+    tr.classList.add('open');const det=document.createElement('tr');det.className='detail';
+    det.innerHTML=`<td colspan="10">${pmDetail(rows[tr.dataset.pi])}</td>`;tr.after(det);};});
 }
+renderPmTable(typeof PM_DATA!=='undefined'?PM_DATA:null,'pm_tb');
+renderPmTable(typeof PMK_DATA!=='undefined'?PMK_DATA:null,'pmk_tb');
 const maxM=Math.max(...MONTHS.map(m=>m[1]));
 document.getElementById('tl').innerHTML=MONTHS.map(([mo,n])=>`<div class="tlrow"><span class="mo tnum">${mo}</span><div class="tlbar" style="width:${Math.max(2,Math.round(n/maxM*100))}%"></div><span class="n tnum">${n}</span></div>`).join('');
 document.getElementById('mo').innerHTML='<option value="">All months</option>'+MONTHS.map(([mo])=>`<option value="${mo}">${mo}</option>`).join('');
@@ -1240,6 +1289,8 @@ html=(HTML.replace("__DATA__",DATA_JSON).replace("__MONTHS__",MONTHS_JSON)
           .replace("__TRACK__",TRACK_JSON)
           .replace("__PM_DATA__",PM_DATA_JSON).replace("__PM_PORT__",PM_PORT_JSON)
           .replace("__PM_STATS__",PM_STATS_JSON)
+          .replace("__PMK_DATA__",PMK_DATA_JSON).replace("__PMK_PORT__",PMK_PORT_JSON)
+          .replace("__PMK_STATS__",PMK_STATS_JSON)
           .replace("__PSTAKE__",str(int(portfolio["summary"]["stake"]) if portfolio.get("summary") else 100))
           .replace("__SNAP__",SNAP))
 OUT.write_text(html,encoding="utf-8")

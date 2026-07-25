@@ -20,10 +20,13 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from market_lookup.providers.common import get_json, parse_jsonish_list, probability
 from forecasting.sources.polymarket import GAMMA, _bucket_range
 
+from forecasting.pm_tracks import cfg
+
 ROOT = Path(__file__).resolve().parents[1]
-OPEN = ROOT / "data" / "polymarket_kpi_open.jsonl"
-FCST = ROOT / "data" / "forecasts" / "open_pm_claudeprophet.jsonl"
-LEDGER = ROOT / "data" / "pm_portfolio.json"
+# Path defaults (earnings track); main() overrides these from --track.
+OPEN = cfg("earnings")["open"]
+FCST = cfg("earnings")["fcst"]
+LEDGER = cfg("earnings")["ledger"]
 
 BANKROLL = 1000.0
 STAKE = 1.0            # flat $1 per bet
@@ -219,13 +222,17 @@ def cmd_mark(args) -> int:
 
 
 def main() -> int:
+    global OPEN, FCST, LEDGER
     ap = argparse.ArgumentParser(prog="pm_portfolio")
+    ap.add_argument("--track", default="earnings", choices=["earnings", "kpis"])
     sub = ap.add_subparsers(dest="cmd", required=True)
     ip = sub.add_parser("init"); ip.add_argument("--force", action="store_true")
     sub.add_parser("add")
     sub.add_parser("mark")
     sub.add_parser("rebalance")
     args = ap.parse_args()
+    c = cfg(args.track)
+    OPEN, FCST, LEDGER = c["open"], c["fcst"], c["ledger"]
     return {"init": cmd_init, "add": cmd_add, "mark": cmd_mark,
             "rebalance": cmd_rebalance}[args.cmd](args)
 

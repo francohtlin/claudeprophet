@@ -43,7 +43,7 @@ count() { python3 -c "import json;print(len(json.load(open('$1'))))" 2>/dev/null
   echo "-- open positions"; python3 forecasting/portfolio.py add  || echo "WARN: kalshi add failed"
   echo "-- score settlements"; python3 forecasting/portfolio.py mark || echo "WARN: kalshi mark failed"
 
-  echo "== POLYMARKET =="
+  echo "== POLYMARKET EARNINGS =="
   echo "-- pull fresh prices"
   python3 forecasting/pull_polymarket_kpi.py || echo "WARN: pm pull failed"
   echo "-- select new uncertain metrics"
@@ -53,6 +53,17 @@ count() { python3 -c "import json;print(len(json.load(open('$1'))))" 2>/dev/null
   if [ "$p" -gt 0 ]; then python3 forecasting/forecast_pm.py || echo "WARN: pm forecast failed"; else echo "nothing new"; fi
   echo "-- open positions"; python3 forecasting/pm_portfolio.py add  || echo "WARN: pm add failed"
   echo "-- score settlements"; python3 forecasting/pm_portfolio.py mark || echo "WARN: pm mark failed"
+
+  echo "== POLYMARKET KPIS =="
+  echo "-- pull fresh prices"
+  python3 forecasting/pull_polymarket_kpi.py --track kpis || echo "WARN: pmkpi pull failed"
+  echo "-- select new uncertain metrics"
+  python3 forecasting/select_pm.py --track kpis -n "$MAX_FORECASTS" || echo "WARN: pmkpi select failed"
+  pk=$(count data/forecasts/_chosen_pmkpi.json)
+  echo "-- forecast (${pk} new)"
+  if [ "$pk" -gt 0 ]; then python3 forecasting/forecast_pm.py --track kpis || echo "WARN: pmkpi forecast failed"; else echo "nothing new"; fi
+  echo "-- open positions"; python3 forecasting/pm_portfolio.py --track kpis add  || echo "WARN: pmkpi add failed"
+  echo "-- score settlements"; python3 forecasting/pm_portfolio.py --track kpis mark || echo "WARN: pmkpi mark failed"
 
   echo "== rebuild dashboard =="
   python3 dashboard/gen_dashboard.py || echo "WARN: gen failed"
@@ -66,7 +77,10 @@ count() { python3 -c "import json;print(len(json.load(open('$1'))))" 2>/dev/null
           data/forecasts/resolved_scores.jsonl \
           data/polymarket_kpi_open.jsonl \
           data/forecasts/open_pm_claudeprophet.jsonl \
-          data/pm_portfolio.json 2>/dev/null
+          data/pm_portfolio.json \
+          data/polymarket_kpis_open.jsonl \
+          data/forecasts/open_pmkpi_claudeprophet.jsonl \
+          data/pmkpi_portfolio.json 2>/dev/null
 
   if git diff --cached --quiet; then
     echo "no changes"

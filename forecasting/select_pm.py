@@ -19,10 +19,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from forecasting.kpi_metrics import implied_median
 
-ROOT = Path(__file__).resolve().parents[1]
-OPEN = ROOT / "data" / "polymarket_kpi_open.jsonl"
-FCST = ROOT / "data" / "forecasts" / "open_pm_claudeprophet.jsonl"
-OUT = ROOT / "data" / "forecasts" / "_chosen_pm.json"
+from forecasting.pm_tracks import cfg
 
 BINARY_BAND = (0.05, 0.95)   # only forecast beats the market isn't already sure of
 
@@ -30,7 +27,10 @@ BINARY_BAND = (0.05, 0.95)   # only forecast beats the market isn't already sure
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("-n", "--num", type=int, default=30)
+    ap.add_argument("--track", default="earnings", choices=["earnings", "kpis"])
     args = ap.parse_args()
+    c = cfg(args.track)
+    OPEN, FCST, OUT = c["open"], c["fcst"], c["chosen"]
 
     rows = [json.loads(l) for l in OPEN.open()] if OPEN.exists() else []
     done = set()

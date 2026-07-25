@@ -42,7 +42,7 @@ def fmtv(x: float) -> str:
         return f"{x/1e6:.2f}M" if x < 1e7 else f"{x/1e6:.1f}M"
     if x >= 1e3:
         return f"{x/1e3:.0f}K"
-    return f"{x:g}"
+    return f"{round(x, 1):g}"  # small values (e.g. growth %) to 1 decimal
 
 
 def implied_median(ladder: list[tuple[float, float | None]]) -> tuple[str, float] | None:

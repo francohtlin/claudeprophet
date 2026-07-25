@@ -7,13 +7,18 @@ Parallel to forecast_kpi.py. Two prompt paths:
 Each metric is a fresh `claude -p` child on the CLI subscription (no API key).
 """
 
-import json, subprocess, re, math, os, pathlib
+import json, subprocess, re, math, os, sys, argparse, pathlib
 from datetime import date
 
+sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1]))
+from forecasting.pm_tracks import cfg
+
 TODAY = date.today().isoformat()
-BASE = pathlib.Path(__file__).resolve().parents[1] / "data" / "forecasts"
-chosen = json.load(open(BASE / "_chosen_pm.json"))
-outp = BASE / "open_pm_claudeprophet.jsonl"
+_ap = argparse.ArgumentParser()
+_ap.add_argument("--track", default="earnings", choices=["earnings", "kpis"])
+_c = cfg(_ap.parse_args().track)
+chosen = json.load(open(_c["chosen"]))
+outp = _c["fcst"]
 
 def ncdf(x): return 0.5 * (1 + math.erf(x / math.sqrt(2)))
 
