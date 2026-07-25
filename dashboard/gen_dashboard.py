@@ -250,6 +250,38 @@ pm_stats={"shown":len(pm_data),"ladders":sum(1 for d in pm_data if d["kind"]!="b
           "positions":len(pm_portfolio["positions"]),
           "next":min((d["close"] for d in pm_data if d["close"]),default="-")}
 
+# ---- combined table: attach full bet detail to each forecast row, and append
+# any settled/held bets whose market has left the open feed so none are lost ----
+def _merge_bets(rows, positions, pos_key, row_key):
+    pos_by = {pos_key(p): p for p in positions}
+    have = {row_key(d) for d in rows}
+    for d in rows:
+        p = pos_by.get(row_key(d))
+        if p:
+            d["bet"] = {"url": (d.get("bet") or {}).get("url") or p.get("url"),
+                        "side": p["side"], "entry": p.get("entry"), "cur": p.get("cur"),
+                        "pnl": p.get("pnl"), "status": p["status"], "result": p.get("result")}
+    return [p for k, p in pos_by.items() if k not in have]
+
+for p in _merge_bets(data, portfolio["positions"],
+                     lambda p: (p["co"].lower(), p["metric"].lower(), p["period"], p["r"]),
+                     lambda d: (d["co"].lower(), d["metric"].lower(), d["period"], d["r"])):
+    data.append({"co": p["co"], "metric": p["metric"], "period": p["period"], "r": p["r"],
+                 "n": 0, "v": 0, "med": None, "medop": "", "lad": [], "cp": None, "cp_op": None,
+                 "edge": None, "reason": None, "cprange": None, "fs": None, "fs_op": None, "fs_reason": None,
+                 "off_feed": True,
+                 "bet": {"url": p.get("url"), "side": p["side"], "entry": p.get("entry"),
+                         "cur": p.get("cur"), "pnl": p.get("pnl"), "status": p["status"], "result": p.get("result")}})
+
+for p in _merge_bets(pm_data, pm_portfolio["positions"],
+                     lambda p: (p["co"].lower(), p["metric"].lower(), p["period"]),
+                     lambda d: (d["co"].lower(), d["metric"].lower(), d["period"])):
+    pm_data.append({"co": p["co"], "metric": p["metric"], "period": p["period"], "kind": "binary",
+                    "close": p.get("r", ""), "url": p.get("url"), "market": "", "our": "", "edge": None,
+                    "edge_disp": "", "reason": "", "lad": [], "off_feed": True,
+                    "bet": {"url": p.get("url"), "side": p["side"], "entry": p.get("entry"),
+                            "cur": p.get("cur"), "pnl": p.get("pnl"), "status": p["status"], "result": p.get("result")}})
+
 DATA_JSON=json.dumps(data,separators=(",",":"))
 MONTHS_JSON=json.dumps(sorted(months.items()))
 STATS_JSON=json.dumps(stats)
@@ -417,19 +449,12 @@ padding:11px 14px;margin:0 0 13px;color:var(--text);overflow-x:auto}
       <div class="lab" style="margin-bottom:6px">Cumulative realized P&amp;L</div>
       <div id="pnlchart"></div>
     </div>
-    <div class="tblwrap" style="border-radius:10px"><table>
-      <thead><tr>
-        <th>Side</th><th>Position</th><th class="num">Resolves</th>
-        <th class="num">Entry</th><th class="num">Our P</th><th class="num">Now</th>
-        <th class="num">P&amp;L</th>
-      </tr></thead>
-      <tbody id="portbody"></tbody>
-    </table></div>
-    <div class="foot" style="margin-top:10px">
-      $1,000 paper bankroll split equally: one position per forecasted metric, on
-      the contract where ClaudeProphet (live research) most disagrees with the
-      market (min 5 pt gap), entered at the mid. P&amp;L is marked to the latest
-      price pull and realizes when markets settle. Paper only &mdash; nothing is traded.
+    <div class="foot" style="margin-top:2px">
+      $1,000 paper bankroll split equally across open positions: one bet per
+      forecasted metric, on the contract where ClaudeProphet (live research) most
+      disagrees with the market (min 5 pt gap), entered at the mid. Each bet &mdash;
+      side, entry, current price and P&amp;L &mdash; is shown in its row in the forecasts
+      table below. Paper only &mdash; nothing is traded.
     </div>
   </div>
 
@@ -449,11 +474,12 @@ padding:11px 14px;margin:0 0 13px;color:var(--text);overflow-x:auto}
       <th data-k="cp" class="num">ClaudeProphet <span class="ar">&#8597;</span></th>
       <th data-k="fs" class="num">FutureSearch <span class="ar">&#8597;</span></th>
       <th data-k="edge" class="num">Edge <span class="ar">&#8597;</span></th>
+      <th>Bet</th><th class="num">Entry</th><th class="num">Now</th><th class="num">P&amp;L</th>
     </tr></thead>
     <tbody id="tb"></tbody>
   </table></div>
   <div class="foot">
-    <b>Market est.</b> = market-implied central value (50% threshold crossing). <b>ClaudeProphet</b> = our live-researched median forecast of the reported figure. <b>FutureSearch</b> = the same central value implied by FutureSearch's independent forecast (from <code>npm run futuresearch:forecast</code>; &ldquo;&mdash;&rdquo; until run). <b>Edge</b> = ClaudeProphet vs market, % of the metric. Click a forecasted row for the reasoning and a threshold-by-threshold market-vs-ClaudeProphet-vs-FutureSearch comparison.
+    <b>Market est.</b> = market-implied central value (50% threshold crossing). <b>ClaudeProphet</b> = our live-researched median forecast of the reported figure. <b>FutureSearch</b> = the same central value implied by FutureSearch's independent forecast (from <code>npm run futuresearch:forecast</code>; &ldquo;&mdash;&rdquo; until run). <b>Edge</b> = ClaudeProphet vs market, % of the metric. <b>Bet / Entry / Now / P&amp;L</b> = the paper position on this metric &mdash; side, entry price, current price (or settled result), and marked P&amp;L. Click a forecasted row for the reasoning and a threshold-by-threshold comparison.
   </div>
   </section>
 
@@ -466,20 +492,12 @@ padding:11px 14px;margin:0 0 13px;color:var(--text);overflow-x:auto}
       <div class="lab" style="margin-bottom:6px">Cumulative realized P&amp;L</div>
       <div id="pm_pnlchart"></div>
     </div>
-    <div class="tblwrap"><table>
-      <thead><tr>
-        <th>Side</th><th>Position</th><th class="num">Resolves</th>
-        <th class="num">Entry</th><th class="num">Our P</th><th class="num">Now</th>
-        <th class="num">P&amp;L</th>
-      </tr></thead>
-      <tbody id="pm_portbody"></tbody>
-    </table></div>
-    <div class="foot" style="margin-top:10px">
+    <div class="foot" style="margin-top:2px">
       Same $1,000 paper book and max-divergence rule as the Kalshi track, run in
       parallel on Polymarket &mdash; here on company earnings: we bet the beat/miss
       contract where our P(beat) most disagrees with the market (min 5 pt gap).
-      Marked to the latest Gamma pull; settles via UMA resolution. Paper only
-      &mdash; nothing is traded.
+      Each bet is shown in its row in the forecasts table below. Marked to the latest
+      Gamma pull; settles via UMA resolution. Paper only &mdash; nothing is traded.
     </div>
   </div>
   <div class="panel">
@@ -488,6 +506,7 @@ padding:11px 14px;margin:0 0 13px;color:var(--text);overflow-x:auto}
       <thead><tr>
         <th>Company</th><th>Market</th><th class="num">Resolves</th>
         <th class="num">Mkt P(beat)</th><th class="num">Our P(beat)</th><th class="num">Edge</th>
+        <th>Bet</th><th class="num">Entry</th><th class="num">Now</th><th class="num">P&amp;L</th>
       </tr></thead>
       <tbody id="pm_tb"></tbody>
     </table></div>
@@ -1054,7 +1073,9 @@ function renderPortfolio(P, ids){
     ['Record',s.wins+s.losses?`${s.wins}W&ndash;${s.losses}L`:'&mdash;','small'],
   ].map(t=>`<div class="tile"><div class="lab">${t[0]}</div><div class="val ${t[2]||''}" style="font-size:20px">${t[1]}</div></div>`).join('');
   drawPnlInto(P.pnl_curve, ids.chart, ids.wrap);
-  document.getElementById(ids.body).innerHTML=P.positions.map(p=>{
+  const bodyEl=document.getElementById(ids.body);
+  if(!bodyEl) return;
+  bodyEl.innerHTML=P.positions.map(p=>{
     const sideC=p.side==='YES'?'var(--yes)':'var(--no)';
     const pnl=p.pnl==null?'<span class="dash">&mdash;</span>':
       `<span class="tnum" style="color:${p.pnl>=0?'var(--up)':'var(--down)'};font-weight:500">${p.pnl>=0?'+':''}$${p.pnl.toFixed(0)}</span>`;
@@ -1085,7 +1106,7 @@ if(typeof PM_STATS!=='undefined'){
 function pmDetail(d){
   let h='';
   if(d.reason) h+=`<div class="reason"><b>ClaudeProphet:</b> ${d.reason}</div>`;
-  if(d.side) h+=`<div class="betline"><span class="bs ${d.side}">${d.side}</span><span>our paper bet &middot; <a class="mktlink" href="${d.url}" target="_blank" rel="noopener">view live market on Polymarket &#8599;</a></span></div>`;
+  if(d.bet&&d.bet.side) h+=`<div class="betline"><span class="bs ${d.bet.side}">${d.bet.side}</span><span>our paper bet &middot; <a class="mktlink" href="${d.bet.url||d.url}" target="_blank" rel="noopener">view live market on Polymarket &#8599;</a></span></div>`;
   if(!d.lad||!d.lad.length) return h||'<div class="ladtitle">binary beat/miss market</div>';
   h+='<div class="ladtitle">threshold &rarr; P(Yes)</div><div class="lad">';
   h+=`<div class="ladrow head"><span class="th">threshold</span><span></span><span class="pm">mkt</span><span class="pc">CP</span></div>`;
@@ -1110,12 +1131,13 @@ if(typeof PM_DATA!=='undefined'){
         <td class="num"><span class="est tnum">${d.market||'&mdash;'}</span></td>
         <td class="num">${d.our?`<span class="cp tnum">${d.our}</span>`:'<span class="dash">&mdash;</span>'}</td>
         <td class="num">${edge}</td>
+        ${betCells(d)}
       </tr>`;}).join('');
     pmtb.querySelectorAll('.grp').forEach(tr=>{tr.onclick=()=>{
       const nx=tr.nextElementSibling;
       if(nx&&nx.classList.contains('detail')){nx.remove();tr.classList.remove('open');return;}
       tr.classList.add('open');const det=document.createElement('tr');det.className='detail';
-      det.innerHTML=`<td colspan="6">${pmDetail(PM_DATA[tr.dataset.pi])}</td>`;tr.after(det);};});
+      det.innerHTML=`<td colspan="10">${pmDetail(PM_DATA[tr.dataset.pi])}</td>`;tr.after(det);};});
   }
 }
 const maxM=Math.max(...MONTHS.map(m=>m[1]));
@@ -1128,6 +1150,17 @@ function est(d){ if(d.med==null)return '<span class="dash">&mdash;</span>'; cons
 function cpCell(d){ return d.cp==null?'<span class="dash">&mdash;</span>':`<span class="cp tnum">&asymp; ${d.cp}</span>`; }
 function fsCell(d){ return d.fs==null?'<span class="dash">&mdash;</span>':`<span class="cp tnum" style="color:var(--fs)">&asymp; ${d.fs}</span>`; }
 function edgeCell(d){ if(d.edge==null)return '<span class="dash">&mdash;</span>'; const c=d.edge>=0?'up':'down'; const s=d.edge>0?'+':''; return `<span class="edge ${c} tnum">${s}${d.edge}%</span>`; }
+function betCells(d){
+  const b=d.bet, dash='<span class="dash">&mdash;</span>';
+  if(!b||!b.side) return `<td>${dash}</td><td class="num">${dash}</td><td class="num">${dash}</td><td class="num">${dash}</td>`;
+  const sideC=b.side==='YES'?'var(--yes)':'var(--no)';
+  const now=b.status==='resolved'?`<span class="pill" style="background:var(--track);color:var(--muted)">${b.result||'settled'}</span>`:(b.cur==null?dash:b.cur.toFixed(2));
+  const pnl=b.pnl==null?dash:`<span class="tnum" style="color:${b.pnl>=0?'var(--up)':'var(--down)'};font-weight:500">${b.pnl>=0?'+':''}$${b.pnl.toFixed(0)}</span>`;
+  return `<td><span style="color:${sideC};font-weight:600">${b.side}</span></td>`+
+         `<td class="num tnum">${b.entry==null?dash:b.entry.toFixed(2)}</td>`+
+         `<td class="num tnum">${now}</td>`+
+         `<td class="num">${pnl}</td>`;
+}
 function detailHTML(d){
   let h='';
   if(d.reason){h+=`<div class="reason"><b>ClaudeProphet:</b> ${d.reason} <span style="color:var(--faint)">(p10&ndash;p90: ${d.cprange})</span></div>`;}
@@ -1167,12 +1200,13 @@ function view(){
       <td class="num">${cpCell(d)}</td>
       <td class="num">${fsCell(d)}</td>
       <td class="num">${edgeCell(d)}</td>
+      ${betCells(d)}
     </tr>`;}).join('');
   tb.querySelectorAll('.grp').forEach(tr=>{tr.onclick=()=>{
     const nx=tr.nextElementSibling;
     if(nx&&nx.classList.contains('detail')){nx.remove();tr.classList.remove('open');return;}
     tr.classList.add('open');const det=document.createElement('tr');det.className='detail';
-    det.innerHTML=`<td colspan="7">${detailHTML(DATA[tr.dataset.i])}</td>`;tr.after(det);};});
+    det.innerHTML=`<td colspan="11">${detailHTML(DATA[tr.dataset.i])}</td>`;tr.after(det);};});
 }
 document.querySelectorAll('#ftable thead th').forEach(th=>{th.onclick=()=>{const k=th.dataset.k;
   if(!k)return;
