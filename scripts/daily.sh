@@ -1,14 +1,15 @@
 #!/usr/bin/env bash
-# One-command daily catch-up. Run it whenever you sit down — it does not care
-# what day it is or how long since the last run:
+# One-command daily catch-up for BOTH venues (Kalshi + Polymarket). Run it
+# whenever you sit down — it does not care what day it is or how long since the
+# last run:
 #   prices -> forecast any newly-listed uncertain metrics -> open paper
 #   positions -> score settlements -> rebuild dashboard -> push.
 #
 # Self-limiting: only metrics that are genuinely uncertain and not already
-# forecasted get picked up, capped at MAX_FORECASTS per run (default 10), so a
-# quiet day costs nothing and a busy one cannot run away. Each forecast is a
-# `claude -p` child on your CLI subscription login — no API key, no per-token
-# billing.
+# forecasted get picked up, capped at MAX_FORECASTS per venue per run (default
+# 10), so a quiet day costs nothing and a busy one cannot run away. Each forecast
+# is a `claude -p` child on your CLI subscription login — no API key, no
+# per-token billing. (FutureSearch is intentionally NOT part of this cycle.)
 #
 # Usage:
 #   scripts/daily.sh                 # full cycle, commits and pushes
@@ -26,38 +27,46 @@ for a in "$@"; do
   [ "$a" = "--no-push" ] && PUSH=0
 done
 
+count() { python3 -c "import json;print(len(json.load(open('$1'))))" 2>/dev/null || echo 0; }
+
 {
-  echo "===== daily $(date -u +%FT%TZ) (cap ${MAX_FORECASTS}) ====="
+  echo "===== daily $(date -u +%FT%TZ) (cap ${MAX_FORECASTS}/venue) ====="
 
-  echo "-- 1/6 pull fresh Kalshi prices"
-  python3 forecasting/pull_kpi_markets.py || echo "WARN: pull failed"
+  echo "== KALSHI =="
+  echo "-- pull fresh prices"
+  python3 forecasting/pull_kpi_markets.py || echo "WARN: kalshi pull failed"
+  echo "-- select new uncertain metrics"
+  python3 forecasting/select_kpi.py -n "$MAX_FORECASTS" || echo "WARN: kalshi select failed"
+  n=$(count data/forecasts/_chosen.json)
+  echo "-- forecast (${n} new)"
+  if [ "$n" -gt 0 ]; then python3 forecasting/forecast_kpi.py || echo "WARN: kalshi forecast failed"; else echo "nothing new"; fi
+  echo "-- open positions"; python3 forecasting/portfolio.py add  || echo "WARN: kalshi add failed"
+  echo "-- score settlements"; python3 forecasting/portfolio.py mark || echo "WARN: kalshi mark failed"
 
-  echo "-- 2/6 select new uncertain metrics"
-  python3 forecasting/select_kpi.py -n "$MAX_FORECASTS" || echo "WARN: select failed"
+  echo "== POLYMARKET =="
+  echo "-- pull fresh prices"
+  python3 forecasting/pull_polymarket_kpi.py || echo "WARN: pm pull failed"
+  echo "-- select new uncertain metrics"
+  python3 forecasting/select_pm.py -n "$MAX_FORECASTS" || echo "WARN: pm select failed"
+  p=$(count data/forecasts/_chosen_pm.json)
+  echo "-- forecast (${p} new)"
+  if [ "$p" -gt 0 ]; then python3 forecasting/forecast_pm.py || echo "WARN: pm forecast failed"; else echo "nothing new"; fi
+  echo "-- open positions"; python3 forecasting/pm_portfolio.py add  || echo "WARN: pm add failed"
+  echo "-- score settlements"; python3 forecasting/pm_portfolio.py mark || echo "WARN: pm mark failed"
 
-  n=$(python3 -c "import json;print(len(json.load(open('data/forecasts/_chosen.json'))))" 2>/dev/null || echo 0)
-  echo "-- 3/6 forecast (${n} new metric(s))"
-  if [ "$n" -gt 0 ]; then
-    python3 forecasting/forecast_kpi.py || echo "WARN: forecast failed"
-  else
-    echo "nothing new to forecast - skipping"
-  fi
-
-  echo "-- 4/6 open paper positions"
-  python3 forecasting/portfolio.py add || echo "WARN: add failed"
-
-  echo "-- 5/6 score settlements"
-  python3 forecasting/portfolio.py mark || echo "WARN: mark failed"
-
-  echo "-- 6/6 rebuild dashboard"
+  echo "== rebuild dashboard =="
   python3 dashboard/gen_dashboard.py || echo "WARN: gen failed"
 
-  # Scoped add - never touch anything but this pipeline's own outputs.
+  # Scoped add - only this pipeline's own outputs, both venues. Never the
+  # generator source or unrelated WIP (FutureSearch / RL live outside this add).
   git add docs/index.html \
           data/company_kpi_open.jsonl \
           data/portfolio.json \
           data/forecasts/open_kpi_claudeprophet.jsonl \
-          data/forecasts/resolved_scores.jsonl 2>/dev/null
+          data/forecasts/resolved_scores.jsonl \
+          data/polymarket_kpi_open.jsonl \
+          data/forecasts/open_pm_claudeprophet.jsonl \
+          data/pm_portfolio.json 2>/dev/null
 
   if git diff --cached --quiet; then
     echo "no changes"
@@ -73,4 +82,4 @@ done
   echo "===== done ====="
 } >> "$LOG" 2>&1
 
-tail -30 "$LOG"
+tail -40 "$LOG"
