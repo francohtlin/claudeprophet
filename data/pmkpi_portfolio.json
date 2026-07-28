@@ -171,7 +171,28 @@
       "status": "open",
       "result": null,
       "realized_pnl": null
+    },
+    {
+      "ticker": "0x078f745dc3e09e56ed5a8ebbd983b2bfd4fc40f5f0bb7d3fabffe0dfb8689ee9",
+      "co": "Lam Research",
+      "metric": "total revenue",
+      "period": "Q4",
+      "kind": "ladder",
+      "threshold": 6800000000.0,
+      "question": "Will Lam Research (LRCX) Q4 total revenue be above $6.8B?",
+      "market_url": "https://polymarket.com/event/will-lam-research-lrcx-q4-total-revenue-be-above-20260718025851281",
+      "side": "YES",
+      "cp_p": 0.479,
+      "entry_yes_mid": 0.27,
+      "entry_price": 0.27,
+      "stake": 1.0,
+      "contracts": 3.7,
+      "entry_date": "2026-07-28",
+      "source": "polymarket",
+      "status": "open",
+      "result": null,
+      "realized_pnl": null
     }
   ],
-  "marked_at": "2026-07-28T04:30:33+00:00"
+  "marked_at": "2026-07-28T23:31:51+00:00"
 }
