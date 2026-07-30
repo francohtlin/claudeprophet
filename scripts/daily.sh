@@ -65,27 +65,7 @@ count() { python3 -c "import json;print(len(json.load(open('$1'))))" 2>/dev/null
   echo "-- open positions"; python3 forecasting/pm_portfolio.py --track kpis add  || echo "WARN: pmkpi add failed"
   echo "-- score settlements"; python3 forecasting/pm_portfolio.py --track kpis mark || echo "WARN: pmkpi mark failed"
 
-  echo "== WEATHER (Kalshi climate, Wealthsimple-eligible) =="
-  echo "-- pull fresh prices"
-  python3 forecasting/pull_weather.py || echo "WARN: weather pull failed"
-  echo "-- select new uncertain ladders"
-  python3 forecasting/select_weather.py -n "$MAX_FORECASTS" || echo "WARN: weather select failed"
-  w=$(count data/forecasts/_chosen_weather.json)
-  echo "-- forecast (${w} new)"
-  if [ "$w" -gt 0 ]; then python3 forecasting/forecast_weather.py || echo "WARN: weather forecast failed"; else echo "nothing new"; fi
-  echo "-- open positions"; python3 forecasting/weather_portfolio.py add  || echo "WARN: weather add failed"
-  echo "-- score settlements"; python3 forecasting/weather_portfolio.py mark || echo "WARN: weather mark failed"
-
-  echo "== WEATHER NEAR-TERM (fast-resolving monthly totals) =="
-  echo "-- pull fresh prices"
-  python3 forecasting/pull_weather.py --track nearterm || echo "WARN: weather-nt pull failed"
-  echo "-- select new uncertain ladders"
-  python3 forecasting/select_weather.py --track nearterm -n "$MAX_FORECASTS" || echo "WARN: weather-nt select failed"
-  wn=$(count data/forecasts/_chosen_weather_nt.json)
-  echo "-- forecast (${wn} new)"
-  if [ "$wn" -gt 0 ]; then python3 forecasting/forecast_weather.py --track nearterm || echo "WARN: weather-nt forecast failed"; else echo "nothing new"; fi
-  echo "-- open positions"; python3 forecasting/weather_portfolio.py --track nearterm add  || echo "WARN: weather-nt add failed"
-  echo "-- score settlements"; python3 forecasting/weather_portfolio.py --track nearterm mark || echo "WARN: weather-nt mark failed"
+  # Weather markets now live in the separate claudeprophet-canada repo.
 
   echo "== rebuild dashboard =="
   python3 dashboard/gen_dashboard.py || echo "WARN: gen failed"
@@ -102,13 +82,7 @@ count() { python3 -c "import json;print(len(json.load(open('$1'))))" 2>/dev/null
           data/pm_portfolio.json \
           data/polymarket_kpis_open.jsonl \
           data/forecasts/open_pmkpi_claudeprophet.jsonl \
-          data/pmkpi_portfolio.json \
-          data/weather_open.jsonl \
-          data/forecasts/open_weather_claudeprophet.jsonl \
-          data/weather_portfolio.json \
-          data/weather_nt_open.jsonl \
-          data/forecasts/open_weather_nt_claudeprophet.jsonl \
-          data/weather_nt_portfolio.json 2>/dev/null
+          data/pmkpi_portfolio.json 2>/dev/null
 
   if git diff --cached --quiet; then
     echo "no changes"

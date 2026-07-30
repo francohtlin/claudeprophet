@@ -165,7 +165,7 @@ if PORT_PATH.exists():
 # Brier (our P vs the settled 0/1 outcome) so the panel reflects the real book. ----
 track=[]
 _TRACK_BOOKS=[("data/portfolio.json","Kalshi"),("data/pm_portfolio.json","PM earnings"),
-              ("data/pmkpi_portfolio.json","PM KPIs"),("data/weather_portfolio.json","Weather")]
+              ("data/pmkpi_portfolio.json","PM KPIs")]
 for _pf,_src in _TRACK_BOOKS:
     _p=ROOT/_pf
     if not _p.exists(): continue
@@ -266,10 +266,6 @@ pm_data, pm_portfolio, pm_stats = build_pm_track(
     ROOT/"data"/"polymarket_kpi_open.jsonl", ROOT/"data"/"forecasts"/"open_pm_claudeprophet.jsonl", ROOT/"data"/"pm_portfolio.json")
 pmk_data, pmk_portfolio, pmk_stats = build_pm_track(
     ROOT/"data"/"polymarket_kpis_open.jsonl", ROOT/"data"/"forecasts"/"open_pmkpi_claudeprophet.jsonl", ROOT/"data"/"pmkpi_portfolio.json")
-wx_data, wx_portfolio, wx_stats = build_pm_track(
-    ROOT/"data"/"weather_open.jsonl", ROOT/"data"/"forecasts"/"open_weather_claudeprophet.jsonl", ROOT/"data"/"weather_portfolio.json")
-wxn_data, wxn_portfolio, wxn_stats = build_pm_track(
-    ROOT/"data"/"weather_nt_open.jsonl", ROOT/"data"/"forecasts"/"open_weather_nt_claudeprophet.jsonl", ROOT/"data"/"weather_nt_portfolio.json")
 
 # ---- combined table: attach full bet detail to each forecast row, and append
 # any settled/held bets whose market has left the open feed so none are lost ----
@@ -306,8 +302,6 @@ def _merge_pm_bets(rows, positions):
                              "cur": p.get("cur"), "pnl": p.get("pnl"), "status": p["status"], "result": p.get("result")}})
 _merge_pm_bets(pm_data, pm_portfolio["positions"])
 _merge_pm_bets(pmk_data, pmk_portfolio["positions"])
-_merge_pm_bets(wx_data, wx_portfolio["positions"])
-_merge_pm_bets(wxn_data, wxn_portfolio["positions"])
 
 DATA_JSON=json.dumps(data,separators=(",",":"))
 MONTHS_JSON=json.dumps(sorted(months.items()))
@@ -320,12 +314,6 @@ PM_STATS_JSON=json.dumps(pm_stats)
 PMK_DATA_JSON=json.dumps(pmk_data,separators=(",",":"))
 PMK_PORT_JSON=json.dumps(pmk_portfolio,separators=(",",":"))
 PMK_STATS_JSON=json.dumps(pmk_stats)
-WX_DATA_JSON=json.dumps(wx_data,separators=(",",":"))
-WX_PORT_JSON=json.dumps(wx_portfolio,separators=(",",":"))
-WX_STATS_JSON=json.dumps(wx_stats)
-WXN_DATA_JSON=json.dumps(wxn_data,separators=(",",":"))
-WXN_PORT_JSON=json.dumps(wxn_portfolio,separators=(",",":"))
-WXN_STATS_JSON=json.dumps(wxn_stats)
 
 HTML = r"""<title>Company-KPI open markets</title>
 <style>
@@ -594,77 +582,7 @@ padding:11px 14px;margin:0 0 13px;color:var(--text);overflow-x:auto}
   </div>
   </section>
 
-  <section class="tabpanel" data-tab="weather" data-tab-label="Weather" role="tabpanel" tabindex="0" hidden>
-  <div class="tiles" id="wx_tiles"></div>
-  <div class="panel" id="wx_portpanel" style="display:none">
-    <h2>Weather paper portfolio &mdash; tracking, not trading</h2>
-    <div class="tiles" id="wx_porttiles" style="margin-bottom:14px"></div>
-    <div id="wx_pnlwrap" style="display:none;margin-bottom:16px">
-      <div class="lab" style="margin-bottom:6px">Cumulative realized P&amp;L</div>
-      <div id="wx_pnlchart"></div>
-    </div>
-    <div class="foot" style="margin-top:2px">
-      Same flat-$1-per-bet, max-divergence rule as the other books, run on Kalshi
-      <b>climate/weather</b> markets &mdash; the category (with a &ge;30-day settlement)
-      that Wealthsimple Predict is authorized to offer in Canada. We bet the threshold
-      contract where ClaudeProphet most disagrees with the market. Settles on Kalshi.
-      Paper only &mdash; nothing is traded.
-    </div>
-  </div>
-  <div class="panel">
-    <h2>Weather forecasts &mdash; Kalshi climate (Wealthsimple-eligible)</h2>
-    <div class="tblwrap"><table id="wx_ftable">
-      <thead><tr>
-        <th>Subject</th><th>Period</th><th class="num">Resolves</th>
-        <th class="num">Market est.</th><th class="num">ClaudeProphet</th><th class="num">Edge</th>
-        <th>Bet</th><th class="num">Entry</th><th class="num">Now</th><th class="num">P&amp;L</th>
-      </tr></thead>
-      <tbody id="wx_tb"></tbody>
-    </table></div>
-    <div class="foot">
-      Kalshi climate/weather ladders (rain, temperature, storm/hurricane counts, water levels),
-      restricted to the Wealthsimple-tradeable set (climate category, settles &ge;30 days out, priced).
-      <b>Market est.</b> = market-implied central value; <b>ClaudeProphet</b> = our
-      live-researched forecast (climatology + seasonal outlooks); <b>Edge</b> = our view vs market.
-      Click a row for reasoning and the threshold ladder. Links open the live Kalshi market.
-    </div>
-  </div>
-  </section>
 
-  <section class="tabpanel" data-tab="weathernt" data-tab-label="Weather (near-term)" role="tabpanel" tabindex="0" hidden>
-  <div class="tiles" id="wxn_tiles"></div>
-  <div class="panel" id="wxn_portpanel" style="display:none">
-    <h2>Near-term weather paper portfolio &mdash; tracking, not trading</h2>
-    <div class="tiles" id="wxn_porttiles" style="margin-bottom:14px"></div>
-    <div id="wxn_pnlwrap" style="display:none;margin-bottom:16px">
-      <div class="lab" style="margin-bottom:6px">Cumulative realized P&amp;L</div>
-      <div id="wxn_pnlchart"></div>
-    </div>
-    <div class="foot" style="margin-top:2px">
-      A fast-feedback confidence book: same flat-$1, max-divergence rule on Kalshi
-      <b>near-term monthly totals</b> (rain inches, tornado count) that settle within
-      ~2 days &mdash; a genuine calibration test (real uncertainty, quick resolution).
-      Same-day daily-temperature markets are excluded as near-deterministic.
-      <b>Not Wealthsimple-tradeable</b> (settles &lt;30 days). Paper only.
-    </div>
-  </div>
-  <div class="panel">
-    <h2>Near-term weather forecasts &mdash; Kalshi monthly totals (~2-day resolution)</h2>
-    <div class="tblwrap"><table id="wxn_ftable">
-      <thead><tr>
-        <th>Subject</th><th>Period</th><th class="num">Resolves</th>
-        <th class="num">Market est.</th><th class="num">ClaudeProphet</th><th class="num">Edge</th>
-        <th>Bet</th><th class="num">Entry</th><th class="num">Now</th><th class="num">P&amp;L</th>
-      </tr></thead>
-      <tbody id="wxn_tb"></tbody>
-    </table></div>
-    <div class="foot">
-      Kalshi month-total climate ladders (rain, tornado/storm counts) resolving within ~12 days.
-      For quickly building a resolved-bet track record. Click a row for reasoning and the ladder;
-      links open the live Kalshi market.
-    </div>
-  </div>
-  </section>
 
   <section class="tabpanel" data-tab="how" data-tab-label="How forecasting works" role="tabpanel" tabindex="0" hidden>
   <div class="panel doc">
@@ -1105,8 +1023,6 @@ padding:11px 14px;margin:0 0 13px;color:var(--text);overflow-x:auto}
 const DATA=__DATA__, MONTHS=__MONTHS__, STATS=__STATS__, PORT=__PORT__, TRACK=__TRACK__;
 const PM_DATA=__PM_DATA__, PM_PORT=__PM_PORT__, PM_STATS=__PM_STATS__;
 const PMK_DATA=__PMK_DATA__, PMK_PORT=__PMK_PORT__, PMK_STATS=__PMK_STATS__;
-const WX_DATA=__WX_DATA__, WX_PORT=__WX_PORT__, WX_STATS=__WX_STATS__;
-const WXN_DATA=__WXN_DATA__, WXN_PORT=__WXN_PORT__, WXN_STATS=__WXN_STATS__;
 const root=document.documentElement;
 function setTheme(t){root.setAttribute('data-theme',t);try{localStorage.setItem('kpi-theme',t);}catch(e){}}
 (function(){let s=null;try{s=localStorage.getItem('kpi-theme');}catch(e){}setTheme(s||(matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light'));})();
@@ -1262,8 +1178,6 @@ function renderPortfolio(P, ids){
 renderPortfolio(PORT, {panel:'portpanel',tiles:'porttiles',body:'portbody',chart:'pnlchart',wrap:'pnlwrap'});
 renderPortfolio(typeof PM_PORT!=='undefined'?PM_PORT:null, {panel:'pm_portpanel',tiles:'pm_porttiles',body:'pm_portbody',chart:'pm_pnlchart',wrap:'pm_pnlwrap'});
 renderPortfolio(typeof PMK_PORT!=='undefined'?PMK_PORT:null, {panel:'pmk_portpanel',tiles:'pmk_porttiles',body:'pmk_portbody',chart:'pmk_pnlchart',wrap:'pmk_pnlwrap'});
-renderPortfolio(typeof WX_PORT!=='undefined'?WX_PORT:null, {panel:'wx_portpanel',tiles:'wx_porttiles',body:'wx_portbody',chart:'wx_pnlchart',wrap:'wx_pnlwrap'});
-renderPortfolio(typeof WXN_PORT!=='undefined'?WXN_PORT:null, {panel:'wxn_portpanel',tiles:'wxn_porttiles',body:'wxn_portbody',chart:'wxn_pnlchart',wrap:'wxn_pnlwrap'});
 // ---- Polymarket tiles + markets tables (shared by the earnings and KPI tracks) ----
 function renderPmTiles(stats, tilesId, primaryLabel){
   const pt=document.getElementById(tilesId);
@@ -1277,8 +1191,6 @@ function renderPmTiles(stats, tilesId, primaryLabel){
 }
 renderPmTiles(typeof PM_STATS!=='undefined'?PM_STATS:null,'pm_tiles','Earnings markets');
 renderPmTiles(typeof PMK_STATS!=='undefined'?PMK_STATS:null,'pmk_tiles','KPI metrics');
-renderPmTiles(typeof WX_STATS!=='undefined'?WX_STATS:null,'wx_tiles','Weather markets');
-renderPmTiles(typeof WXN_STATS!=='undefined'?WXN_STATS:null,'wxn_tiles','Near-term markets');
 function pmDetail(d){
   let h='';
   if(d.reason) h+=`<div class="reason"><b>ClaudeProphet:</b> ${d.reason}</div>`;
@@ -1317,8 +1229,6 @@ function renderPmTable(rows, tbodyId){
 }
 renderPmTable(typeof PM_DATA!=='undefined'?PM_DATA:null,'pm_tb');
 renderPmTable(typeof PMK_DATA!=='undefined'?PMK_DATA:null,'pmk_tb');
-renderPmTable(typeof WX_DATA!=='undefined'?WX_DATA:null,'wx_tb');
-renderPmTable(typeof WXN_DATA!=='undefined'?WXN_DATA:null,'wxn_tb');
 const maxM=Math.max(...MONTHS.map(m=>m[1]));
 document.getElementById('tl').innerHTML=MONTHS.map(([mo,n])=>`<div class="tlrow"><span class="mo tnum">${mo}</span><div class="tlbar" style="width:${Math.max(2,Math.round(n/maxM*100))}%"></div><span class="n tnum">${n}</span></div>`).join('');
 document.getElementById('mo').innerHTML='<option value="">All months</option>'+MONTHS.map(([mo])=>`<option value="${mo}">${mo}</option>`).join('');
@@ -1421,10 +1331,6 @@ html=(HTML.replace("__DATA__",DATA_JSON).replace("__MONTHS__",MONTHS_JSON)
           .replace("__PM_STATS__",PM_STATS_JSON)
           .replace("__PMK_DATA__",PMK_DATA_JSON).replace("__PMK_PORT__",PMK_PORT_JSON)
           .replace("__PMK_STATS__",PMK_STATS_JSON)
-          .replace("__WX_DATA__",WX_DATA_JSON).replace("__WX_PORT__",WX_PORT_JSON)
-          .replace("__WX_STATS__",WX_STATS_JSON)
-          .replace("__WXN_DATA__",WXN_DATA_JSON).replace("__WXN_PORT__",WXN_PORT_JSON)
-          .replace("__WXN_STATS__",WXN_STATS_JSON)
           .replace("__PSTAKE__",str(int(portfolio["summary"]["stake"]) if portfolio.get("summary") else 100))
           .replace("__SNAP__",SNAP))
 OUT.write_text(html,encoding="utf-8")
