@@ -161,9 +161,26 @@ if PORT_PATH.exists():
                           "stake":led.get("stake_per_position",100),
                           "created":led.get("created","")[:10]}}
 
-# ---- track record: scored resolved forecasts ----
-SCORES=ROOT/"data"/"forecasts"/"resolved_scores.jsonl"
-track=[json.loads(l) for l in SCORES.open()] if SCORES.exists() else []
+# ---- track record: every resolved paper bet across all books, with per-bet
+# Brier (our P vs the settled 0/1 outcome) so the panel reflects the real book. ----
+track=[]
+_TRACK_BOOKS=[("data/portfolio.json","Kalshi"),("data/pm_portfolio.json","PM earnings"),
+              ("data/pmkpi_portfolio.json","PM KPIs"),("data/weather_portfolio.json","Weather")]
+for _pf,_src in _TRACK_BOOKS:
+    _p=ROOT/_pf
+    if not _p.exists(): continue
+    for p in json.loads(_p.read_text()).get("positions",[]):
+        if p["status"]!="resolved" or p.get("result") not in ("yes","no"): continue
+        outcome=1.0 if p["result"]=="yes" else 0.0
+        cp,mkt=p.get("cp_p"),p.get("entry_yes_mid")
+        track.append({"bet":True,"source":_src,"co":p["co"],
+                      "metric":(p.get("metric") or "").strip(),"period":p.get("period",""),
+                      "side":p["side"],"result":p["result"].upper(),
+                      "our_p":cp,"mkt_p":mkt,
+                      "brier_cp":round((cp-outcome)**2,4) if cp is not None else None,
+                      "brier_market":round((mkt-outcome)**2,4) if mkt is not None else None,
+                      "pnl":p.get("realized_pnl")})
+track.sort(key=lambda t:(t["brier_cp"] if t["brier_cp"] is not None else 9))
 
 # ===== Polymarket parallel track (separate files; never touches Kalshi data) =====
 from collections import defaultdict as _dd
@@ -249,6 +266,8 @@ pm_data, pm_portfolio, pm_stats = build_pm_track(
     ROOT/"data"/"polymarket_kpi_open.jsonl", ROOT/"data"/"forecasts"/"open_pm_claudeprophet.jsonl", ROOT/"data"/"pm_portfolio.json")
 pmk_data, pmk_portfolio, pmk_stats = build_pm_track(
     ROOT/"data"/"polymarket_kpis_open.jsonl", ROOT/"data"/"forecasts"/"open_pmkpi_claudeprophet.jsonl", ROOT/"data"/"pmkpi_portfolio.json")
+wx_data, wx_portfolio, wx_stats = build_pm_track(
+    ROOT/"data"/"weather_open.jsonl", ROOT/"data"/"forecasts"/"open_weather_claudeprophet.jsonl", ROOT/"data"/"weather_portfolio.json")
 
 # ---- combined table: attach full bet detail to each forecast row, and append
 # any settled/held bets whose market has left the open feed so none are lost ----
@@ -285,6 +304,7 @@ def _merge_pm_bets(rows, positions):
                              "cur": p.get("cur"), "pnl": p.get("pnl"), "status": p["status"], "result": p.get("result")}})
 _merge_pm_bets(pm_data, pm_portfolio["positions"])
 _merge_pm_bets(pmk_data, pmk_portfolio["positions"])
+_merge_pm_bets(wx_data, wx_portfolio["positions"])
 
 DATA_JSON=json.dumps(data,separators=(",",":"))
 MONTHS_JSON=json.dumps(sorted(months.items()))
@@ -297,6 +317,9 @@ PM_STATS_JSON=json.dumps(pm_stats)
 PMK_DATA_JSON=json.dumps(pmk_data,separators=(",",":"))
 PMK_PORT_JSON=json.dumps(pmk_portfolio,separators=(",",":"))
 PMK_STATS_JSON=json.dumps(pmk_stats)
+WX_DATA_JSON=json.dumps(wx_data,separators=(",",":"))
+WX_PORT_JSON=json.dumps(wx_portfolio,separators=(",",":"))
+WX_STATS_JSON=json.dumps(wx_stats)
 
 HTML = r"""<title>Company-KPI open markets</title>
 <style>
@@ -435,17 +458,20 @@ padding:11px 14px;margin:0 0 13px;color:var(--text);overflow-x:auto}
   <div class="tiles" id="tiles"></div>
 
   <div class="panel" id="trackpanel" style="display:none">
-    <h2>Track record &mdash; resolved forecasts</h2>
+    <h2>Track record &mdash; resolved bets (all books)</h2>
+    <div id="h2h" style="margin:0 0 12px"></div>
     <div class="tblwrap" style="border-radius:10px"><table>
       <thead><tr>
-        <th>Metric</th><th class="num">ClaudeProphet</th><th class="num">Market</th>
-        <th class="num">Actual</th><th class="num">CP Brier</th><th class="num">Mkt Brier</th><th class="num">FS Brier</th><th class="num">Winner</th>
+        <th>Bet</th><th>Book</th><th class="num">Result</th>
+        <th class="num">Our P</th><th class="num">Mkt P</th>
+        <th class="num">CP Brier</th><th class="num">Mkt Brier</th><th class="num">P&amp;L</th><th class="num">Winner</th>
       </tr></thead>
       <tbody id="trackbody"></tbody>
     </table></div>
     <div class="foot" style="margin-top:10px">
-      Brier scores (lower is better) computed per threshold contract against the settled
-      outcome, market prices taken at the same pre-release snapshot as the forecast.
+      Every settled paper bet across all books. <b>Our P / Mkt P</b> = our vs the market's
+      probability the contract resolved YES; <b>Brier</b> = squared error vs the 0/1 outcome
+      (lower is better); <b>Winner</b> = whoever was closer. P&amp;L on the flat $1 stake.
     </div>
   </div>
 
@@ -558,6 +584,43 @@ padding:11px 14px;margin:0 0 13px;color:var(--text);overflow-x:auto}
       <b>Market est.</b> = market-implied central value; <b>ClaudeProphet</b> = our
       live-researched forecast of the figure; <b>Edge</b> = our view vs the market.
       Click a forecasted row for the reasoning and the threshold ladder. Links open the live market.
+    </div>
+  </div>
+  </section>
+
+  <section class="tabpanel" data-tab="weather" data-tab-label="Weather" role="tabpanel" tabindex="0" hidden>
+  <div class="tiles" id="wx_tiles"></div>
+  <div class="panel" id="wx_portpanel" style="display:none">
+    <h2>Weather paper portfolio &mdash; tracking, not trading</h2>
+    <div class="tiles" id="wx_porttiles" style="margin-bottom:14px"></div>
+    <div id="wx_pnlwrap" style="display:none;margin-bottom:16px">
+      <div class="lab" style="margin-bottom:6px">Cumulative realized P&amp;L</div>
+      <div id="wx_pnlchart"></div>
+    </div>
+    <div class="foot" style="margin-top:2px">
+      Same flat-$1-per-bet, max-divergence rule as the other books, run on Kalshi
+      <b>climate/weather</b> markets &mdash; the category (with a &ge;30-day settlement)
+      that Wealthsimple Predict is authorized to offer in Canada. We bet the threshold
+      contract where ClaudeProphet most disagrees with the market. Settles on Kalshi.
+      Paper only &mdash; nothing is traded.
+    </div>
+  </div>
+  <div class="panel">
+    <h2>Weather forecasts &mdash; Kalshi climate (Wealthsimple-eligible)</h2>
+    <div class="tblwrap"><table id="wx_ftable">
+      <thead><tr>
+        <th>Subject</th><th>Period</th><th class="num">Resolves</th>
+        <th class="num">Market est.</th><th class="num">ClaudeProphet</th><th class="num">Edge</th>
+        <th>Bet</th><th class="num">Entry</th><th class="num">Now</th><th class="num">P&amp;L</th>
+      </tr></thead>
+      <tbody id="wx_tb"></tbody>
+    </table></div>
+    <div class="foot">
+      Kalshi climate/weather ladders (rain, temperature, storm/hurricane counts, water levels),
+      restricted to the Wealthsimple-tradeable set (climate category, settles &ge;30 days out, priced).
+      <b>Market est.</b> = market-implied central value; <b>ClaudeProphet</b> = our
+      live-researched forecast (climatology + seasonal outlooks); <b>Edge</b> = our view vs market.
+      Click a row for reasoning and the threshold ladder. Links open the live Kalshi market.
     </div>
   </div>
   </section>
@@ -1001,6 +1064,7 @@ padding:11px 14px;margin:0 0 13px;color:var(--text);overflow-x:auto}
 const DATA=__DATA__, MONTHS=__MONTHS__, STATS=__STATS__, PORT=__PORT__, TRACK=__TRACK__;
 const PM_DATA=__PM_DATA__, PM_PORT=__PM_PORT__, PM_STATS=__PM_STATS__;
 const PMK_DATA=__PMK_DATA__, PMK_PORT=__PMK_PORT__, PMK_STATS=__PMK_STATS__;
+const WX_DATA=__WX_DATA__, WX_PORT=__WX_PORT__, WX_STATS=__WX_STATS__;
 const root=document.documentElement;
 function setTheme(t){root.setAttribute('data-theme',t);try{localStorage.setItem('kpi-theme',t);}catch(e){}}
 (function(){let s=null;try{s=localStorage.getItem('kpi-theme');}catch(e){}setTheme(s||(matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light'));})();
@@ -1055,22 +1119,40 @@ document.getElementById('tiles').innerHTML=[
 
 if(TRACK.length){
   document.getElementById('trackpanel').style.display='';
-  const fm=v=>{if(v>=1e9)return (v/1e9).toFixed(2)+'B';if(v>=1e6)return (v/1e6).toFixed(2)+'M';if(v>=1e3)return Math.round(v/1e3)+'K';return String(v);};
+  const pct=v=>v==null?'&mdash;':Math.round(v*100)+'%';
   document.getElementById('trackbody').innerHTML=TRACK.map(t=>{
-    const briers=[['ClaudeProphet',t.brier_cp,'var(--up)'],['Market',t.brier_market,'var(--down)']];
-    if(t.brier_fs!=null)briers.push(['FutureSearch',t.brier_fs,'var(--fs)']);
-    const win=briers.slice().sort((a,b)=>a[1]-b[1])[0];
-    const cpWin=win[0]==='ClaudeProphet';
+    const cpWin=t.brier_cp!=null&&t.brier_market!=null&&t.brier_cp<=t.brier_market;
+    const won=(t.pnl||0)>0;
+    const sideC=t.side==='YES'?'var(--yes)':'var(--no)';
+    const per=t.period?`<span class="nc">${t.period}</span>`:'';
     return `<tr>
-      <td><span style="font-weight:500">${t.co}</span> &mdash; ${t.metric}<span class="nc">${t.period}</span></td>
-      <td class="num tnum">${fm(t.cp_median)}</td>
-      <td class="num tnum">${fm(t.market_median)}</td>
-      <td class="num tnum">${t.actual_range}</td>
-      <td class="num tnum" style="font-weight:500;color:${cpWin?'var(--up)':'var(--text)'}">${t.brier_cp.toFixed(3)}</td>
-      <td class="num tnum">${t.brier_market.toFixed(3)}</td>
-      <td class="num tnum" style="color:var(--fs)">${t.brier_fs!=null?t.brier_fs.toFixed(3):'&mdash;'}</td>
-      <td class="num" style="font-weight:600;color:${win[2]}">${win[0]}</td>
+      <td><span style="color:${sideC};font-weight:600">${t.side}</span> <span style="font-weight:500">${t.co}</span> ${t.metric}${per}</td>
+      <td class="nc">${t.source}</td>
+      <td class="num"><span class="pill" style="background:${won?'var(--up-bg)':'var(--down-bg)'};color:${won?'var(--up)':'var(--down)'}">${t.result}</span></td>
+      <td class="num tnum">${pct(t.our_p)}</td>
+      <td class="num tnum">${pct(t.mkt_p)}</td>
+      <td class="num tnum" style="font-weight:500;color:${cpWin?'var(--up)':'var(--text)'}">${t.brier_cp!=null?t.brier_cp.toFixed(3):'&mdash;'}</td>
+      <td class="num tnum">${t.brier_market!=null?t.brier_market.toFixed(3):'&mdash;'}</td>
+      <td class="num tnum" style="color:${won?'var(--up)':'var(--down)'};font-weight:500">${t.pnl>=0?'+':''}$${(t.pnl||0).toFixed(2)}</td>
+      <td class="num" style="font-weight:600;color:${cpWin?'var(--up)':'var(--down)'}">${cpWin?'ClaudeProphet':'Market'}</td>
     </tr>`;}).join('');
+
+  const wb=TRACK.filter(t=>t.brier_cp!=null&&t.brier_market!=null);
+  if(wb.length){
+    const avg=f=>wb.reduce((s,t)=>s+f(t),0)/wb.length;
+    const cpA=avg(t=>t.brier_cp), mkA=avg(t=>t.brier_market);
+    const cpWins=wb.filter(t=>t.brier_cp<=t.brier_market).length;
+    const wins=TRACK.filter(t=>(t.pnl||0)>0).length, pnl=TRACK.reduce((s,t)=>s+(t.pnl||0),0);
+    const lead=cpA<=mkA?'ClaudeProphet':'Market', leadC=cpA<=mkA?'var(--up)':'var(--down)';
+    const b=(v,c)=>`<span class="tnum" style="color:${c};font-weight:600">${v.toFixed(3)}</span>`;
+    document.getElementById('h2h').innerHTML=
+      `<div class="tile" style="border-color:${leadC}"><div class="lab">Across ${TRACK.length} resolved bets</div>`+
+      `<div style="font-size:13.5px;line-height:1.7;margin-top:4px">`+
+      `Record <b>${wins}W&ndash;${TRACK.length-wins}L</b>, realized <b style="color:${pnl>=0?'var(--up)':'var(--down)'}">${pnl>=0?'+':''}$${pnl.toFixed(2)}</b>. `+
+      `Mean Brier (lower is better): ClaudeProphet ${b(cpA,'var(--up)')} vs Market ${b(mkA,'var(--down)')} `+
+      `&mdash; we beat the market on <b style="color:var(--up)">${cpWins}/${wb.length}</b>. `+
+      `Calibration leader: <b style="color:${leadC}">${lead}</b>.</div></div>`;
+  }
 }
 function drawPnlInto(c, hostId, wrapId){
   const host=document.getElementById(hostId), wrap=document.getElementById(wrapId);
@@ -1138,6 +1220,7 @@ function renderPortfolio(P, ids){
 renderPortfolio(PORT, {panel:'portpanel',tiles:'porttiles',body:'portbody',chart:'pnlchart',wrap:'pnlwrap'});
 renderPortfolio(typeof PM_PORT!=='undefined'?PM_PORT:null, {panel:'pm_portpanel',tiles:'pm_porttiles',body:'pm_portbody',chart:'pm_pnlchart',wrap:'pm_pnlwrap'});
 renderPortfolio(typeof PMK_PORT!=='undefined'?PMK_PORT:null, {panel:'pmk_portpanel',tiles:'pmk_porttiles',body:'pmk_portbody',chart:'pmk_pnlchart',wrap:'pmk_pnlwrap'});
+renderPortfolio(typeof WX_PORT!=='undefined'?WX_PORT:null, {panel:'wx_portpanel',tiles:'wx_porttiles',body:'wx_portbody',chart:'wx_pnlchart',wrap:'wx_pnlwrap'});
 // ---- Polymarket tiles + markets tables (shared by the earnings and KPI tracks) ----
 function renderPmTiles(stats, tilesId, primaryLabel){
   const pt=document.getElementById(tilesId);
@@ -1151,6 +1234,7 @@ function renderPmTiles(stats, tilesId, primaryLabel){
 }
 renderPmTiles(typeof PM_STATS!=='undefined'?PM_STATS:null,'pm_tiles','Earnings markets');
 renderPmTiles(typeof PMK_STATS!=='undefined'?PMK_STATS:null,'pmk_tiles','KPI metrics');
+renderPmTiles(typeof WX_STATS!=='undefined'?WX_STATS:null,'wx_tiles','Weather markets');
 function pmDetail(d){
   let h='';
   if(d.reason) h+=`<div class="reason"><b>ClaudeProphet:</b> ${d.reason}</div>`;
@@ -1189,6 +1273,7 @@ function renderPmTable(rows, tbodyId){
 }
 renderPmTable(typeof PM_DATA!=='undefined'?PM_DATA:null,'pm_tb');
 renderPmTable(typeof PMK_DATA!=='undefined'?PMK_DATA:null,'pmk_tb');
+renderPmTable(typeof WX_DATA!=='undefined'?WX_DATA:null,'wx_tb');
 const maxM=Math.max(...MONTHS.map(m=>m[1]));
 document.getElementById('tl').innerHTML=MONTHS.map(([mo,n])=>`<div class="tlrow"><span class="mo tnum">${mo}</span><div class="tlbar" style="width:${Math.max(2,Math.round(n/maxM*100))}%"></div><span class="n tnum">${n}</span></div>`).join('');
 document.getElementById('mo').innerHTML='<option value="">All months</option>'+MONTHS.map(([mo])=>`<option value="${mo}">${mo}</option>`).join('');
@@ -1291,6 +1376,8 @@ html=(HTML.replace("__DATA__",DATA_JSON).replace("__MONTHS__",MONTHS_JSON)
           .replace("__PM_STATS__",PM_STATS_JSON)
           .replace("__PMK_DATA__",PMK_DATA_JSON).replace("__PMK_PORT__",PMK_PORT_JSON)
           .replace("__PMK_STATS__",PMK_STATS_JSON)
+          .replace("__WX_DATA__",WX_DATA_JSON).replace("__WX_PORT__",WX_PORT_JSON)
+          .replace("__WX_STATS__",WX_STATS_JSON)
           .replace("__PSTAKE__",str(int(portfolio["summary"]["stake"]) if portfolio.get("summary") else 100))
           .replace("__SNAP__",SNAP))
 OUT.write_text(html,encoding="utf-8")
