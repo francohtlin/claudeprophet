@@ -6,13 +6,17 @@ seasonal outlooks and any current forecasts, returns median/p10/p90 for the
 actual value, and we price every threshold  P(>= t) = 1 - Phi((t-median)/sigma).
 """
 
-import json, subprocess, re, math, os, sys, pathlib
+import json, subprocess, re, math, os, sys, argparse, pathlib
 from datetime import date
 
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1]))
-BASE = pathlib.Path(__file__).resolve().parents[1] / "data" / "forecasts"
-chosen = json.load(open(BASE / "_chosen_weather.json"))
-outp = BASE / "open_weather_claudeprophet.jsonl"
+from forecasting.weather_tracks import cfg
+
+_ap = argparse.ArgumentParser()
+_ap.add_argument("--track", default="wealthsimple", choices=["wealthsimple", "nearterm"])
+_c = cfg(_ap.parse_args().track)
+chosen = json.load(open(_c["chosen"]))
+outp = _c["fcst"]
 TODAY = date.today().isoformat()
 
 def ncdf(x): return 0.5 * (1 + math.erf(x / math.sqrt(2)))

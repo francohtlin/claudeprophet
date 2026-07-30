@@ -15,17 +15,16 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from forecasting.kpi_metrics import implied_median
-
-ROOT = Path(__file__).resolve().parents[1]
-OPEN = ROOT / "data" / "weather_open.jsonl"
-FCST = ROOT / "data" / "forecasts" / "open_weather_claudeprophet.jsonl"
-OUT = ROOT / "data" / "forecasts" / "_chosen_weather.json"
+from forecasting.weather_tracks import cfg
 
 
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("-n", "--num", type=int, default=30)
+    ap.add_argument("--track", default="wealthsimple", choices=["wealthsimple", "nearterm"])
     args = ap.parse_args()
+    c = cfg(args.track)
+    OPEN, FCST, OUT = c["open"], c["fcst"], c["chosen"]
 
     rows = [json.loads(l) for l in OPEN.open()] if OPEN.exists() else []
     done = set()

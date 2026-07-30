@@ -8,6 +8,7 @@ unified row schema the dashboard's ladder machinery already understands.
 
 from __future__ import annotations
 
+import argparse
 import json
 import re
 import sys
@@ -17,9 +18,8 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from backtest.kalshi import list_series, list_markets
+from forecasting.weather_tracks import cfg
 
-OUT = Path(__file__).resolve().parents[1] / "data" / "weather_open.jsonl"
-MIN_SETTLE_DAYS = 30  # Wealthsimple/CIRO: contracts with a >=30-day settlement period
 _SEG = re.compile(r"(\d{2})([A-Z]{3})(\d{2})?")
 
 
@@ -70,8 +70,23 @@ def _variant(ticker: str) -> str:
     return parts[1][m.end():] if m else ""
 
 
+def _is_daily(ticker: str) -> bool:
+    """True if the ticker period targets a specific day (e.g. 26JUL30) rather than
+    a whole month (26JUL) — i.e. a same-day daily-temperature market."""
+    parts = (ticker or "").split("-")
+    if len(parts) < 3:
+        return False
+    m = _SEG.match(parts[1])
+    return bool(m and m.group(3))  # has a day component
+
+
 def main() -> int:
-    cutoff = datetime.now(timezone.utc) + timedelta(days=MIN_SETTLE_DAYS)
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--track", default="wealthsimple", choices=["wealthsimple", "nearterm"])
+    c = cfg(ap.parse_args().track)
+    now = datetime.now(timezone.utc)
+    lo = now + timedelta(days=c["min_settle_days"])
+    hi = now + timedelta(days=c["max_settle_days"]) if c["max_settle_days"] else None
     rows = []
     n_series = 0
     for s in list_series("Climate and Weather"):
@@ -90,13 +105,16 @@ def main() -> int:
             strike = _num(m.get("floor_strike"))
             if strike is None or m.get("strike_type") not in ("greater", "greater_or_equal"):
                 continue  # numeric ">=" ladders only (skip categorical/custom)
+            if c["monthly_only"] and _is_daily(m.get("ticker", "")):
+                continue  # skip same-day daily-temp markets for the near-term totals track
             mid = _mid(m)
             if mid is None:
                 continue  # needs a live price to have an edge
             close = m.get("close_time") or m.get("expiration_time") or ""
             try:
-                if datetime.fromisoformat(close.replace("Z", "+00:00")) < cutoff:
-                    continue  # settles too soon for Wealthsimple's >=30-day rule
+                ct = datetime.fromisoformat(close.replace("Z", "+00:00"))
+                if ct < lo or (hi and ct > hi):
+                    continue  # outside this track's settlement window
             except Exception:
                 continue
             # Group by series + period (constant across a ladder's rungs, unlike
@@ -112,11 +130,13 @@ def main() -> int:
             })
     rows = [r for r in rows if r["ticker"] and r["question"]]
     rows.sort(key=lambda r: (r.get("close_time") or "", r["company"]))
-    OUT.parent.mkdir(parents=True, exist_ok=True)
-    OUT.write_text("".join(json.dumps(r) + "\n" for r in rows))
+    out = c["open"]
+    out.parent.mkdir(parents=True, exist_ok=True)
+    out.write_text("".join(json.dumps(r) + "\n" for r in rows))
     metrics = len({(r["company"], r["metric"], r["period"]) for r in rows})
+    win = f">= {c['min_settle_days']}d" + (f", <= {c['max_settle_days']}d" if c["max_settle_days"] else "")
     print(f"wrote {len(rows)} open weather contracts across {metrics} metrics "
-          f"({n_series} series scanned, >= {MIN_SETTLE_DAYS}-day settle) -> {OUT}")
+          f"({n_series} series scanned, {c['label']}: {win} settle) -> {out}")
     return 0
 
 

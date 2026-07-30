@@ -13,11 +13,13 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+from forecasting.weather_tracks import cfg
 
 ROOT = Path(__file__).resolve().parents[1]
-OPEN = ROOT / "data" / "weather_open.jsonl"
-FCST = ROOT / "data" / "forecasts" / "open_weather_claudeprophet.jsonl"
-LEDGER = ROOT / "data" / "weather_portfolio.json"
+# Path defaults (wealthsimple track); main() overrides these from --track.
+OPEN = cfg("wealthsimple")["open"]
+FCST = cfg("wealthsimple")["fcst"]
+LEDGER = cfg("wealthsimple")["ledger"]
 
 STAKE = 1.0
 MIN_EDGE = 0.05
@@ -156,11 +158,15 @@ def cmd_rebalance(args):
 
 
 def main():
+    global OPEN, FCST, LEDGER
     ap = argparse.ArgumentParser(prog="weather_portfolio")
+    ap.add_argument("--track", default="wealthsimple", choices=["wealthsimple", "nearterm"])
     sub = ap.add_subparsers(dest="cmd", required=True)
     ip = sub.add_parser("init"); ip.add_argument("--force", action="store_true")
     sub.add_parser("add"); sub.add_parser("mark"); sub.add_parser("rebalance")
     args = ap.parse_args()
+    c = cfg(args.track)
+    OPEN, FCST, LEDGER = c["open"], c["fcst"], c["ledger"]
     return {"init": cmd_init, "add": cmd_add, "mark": cmd_mark, "rebalance": cmd_rebalance}[args.cmd](args)
 
 
