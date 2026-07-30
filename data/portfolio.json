@@ -19,9 +19,10 @@
       "stake": 1.0,
       "contracts": 1.9,
       "entry_date": "2026-07-22",
-      "status": "open",
-      "result": null,
-      "realized_pnl": null
+      "status": "resolved",
+      "result": "yes",
+      "realized_pnl": -1.0,
+      "resolved_date": "2026-07-30"
     },
     {
       "ticker": "KXHIMS-26AUGSUBS-P2720000.0",
@@ -190,9 +191,10 @@
       "stake": 1.0,
       "contracts": 28.57,
       "entry_date": "2026-07-22",
-      "status": "open",
-      "result": null,
-      "realized_pnl": null
+      "status": "resolved",
+      "result": "no",
+      "realized_pnl": -1.0,
+      "resolved_date": "2026-07-30"
     },
     {
       "ticker": "KXYOU-26AUGMEM-8400000.0",
@@ -628,9 +630,10 @@
       "stake": 1.0,
       "contracts": 2.67,
       "entry_date": "2026-07-22",
-      "status": "open",
-      "result": null,
-      "realized_pnl": null
+      "status": "resolved",
+      "result": "yes",
+      "realized_pnl": 1.67,
+      "resolved_date": "2026-07-30"
     },
     {
       "ticker": "KXUALA-28JANPAX-186000000",
@@ -1143,9 +1146,10 @@
       "stake": 1.0,
       "contracts": 8.0,
       "entry_date": "2026-07-22",
-      "status": "open",
-      "result": null,
-      "realized_pnl": null
+      "status": "resolved",
+      "result": "yes",
+      "realized_pnl": -1.0,
+      "resolved_date": "2026-07-30"
     },
     {
       "ticker": "KXLYFT-26AUGRIDES-P251000000",
@@ -1335,9 +1339,10 @@
       "stake": 1.0,
       "contracts": 2.6,
       "entry_date": "2026-07-23",
-      "status": "open",
-      "result": null,
-      "realized_pnl": null
+      "status": "resolved",
+      "result": "yes",
+      "realized_pnl": 1.6,
+      "resolved_date": "2026-07-30"
     },
     {
       "ticker": "KXCCL-26SEPALBD-25000000.0",
@@ -1487,9 +1492,10 @@
       "stake": 1.0,
       "contracts": 8.0,
       "entry_date": "2026-07-23",
-      "status": "open",
-      "result": null,
-      "realized_pnl": null
+      "status": "resolved",
+      "result": "yes",
+      "realized_pnl": -1.0,
+      "resolved_date": "2026-07-30"
     },
     {
       "ticker": "KXHD-26AUGTXN-440000000",
@@ -2177,5 +2183,5 @@
       "realized_pnl": null
     }
   ],
-  "marked_at": "2026-07-29T14:53:18+00:00"
+  "marked_at": "2026-07-30T13:01:13+00:00"
 }
