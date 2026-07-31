@@ -249,9 +249,10 @@
       "stake": 1.0,
       "contracts": 1.5,
       "entry_date": "2026-07-22",
-      "status": "open",
-      "result": null,
-      "realized_pnl": null
+      "status": "resolved",
+      "result": "yes",
+      "realized_pnl": 0.5,
+      "resolved_date": "2026-07-31"
     },
     {
       "ticker": "KXHIMSA-28JANSUBS-2960000.0",
@@ -345,9 +346,10 @@
       "stake": 1.0,
       "contracts": 18.18,
       "entry_date": "2026-07-22",
-      "status": "open",
-      "result": null,
-      "realized_pnl": null
+      "status": "resolved",
+      "result": "yes",
+      "realized_pnl": -1.0,
+      "resolved_date": "2026-07-31"
     },
     {
       "ticker": "KXAMZNA-28JANHEAD-1575000",
@@ -535,9 +537,10 @@
       "stake": 1.0,
       "contracts": 2.6,
       "entry_date": "2026-07-22",
-      "status": "open",
-      "result": null,
-      "realized_pnl": null
+      "status": "resolved",
+      "result": "yes",
+      "realized_pnl": 1.6,
+      "resolved_date": "2026-07-31"
     },
     {
       "ticker": "KXCOINBASE-26JULVOL-150000000000",
@@ -688,9 +691,10 @@
       "stake": 1.0,
       "contracts": 3.39,
       "entry_date": "2026-07-22",
-      "status": "open",
-      "result": null,
-      "realized_pnl": null
+      "status": "resolved",
+      "result": "no",
+      "realized_pnl": -1.0,
+      "resolved_date": "2026-07-31"
     },
     {
       "ticker": "KXABNB-26AUGNEB-P147000000",
@@ -937,9 +941,10 @@
       "stake": 1.0,
       "contracts": 3.92,
       "entry_date": "2026-07-22",
-      "status": "open",
-      "result": null,
-      "realized_pnl": null
+      "status": "resolved",
+      "result": "no",
+      "realized_pnl": 2.92,
+      "resolved_date": "2026-07-31"
     },
     {
       "ticker": "KXSE-26AUGQPU-P72000000",
@@ -975,9 +980,10 @@
       "stake": 1.0,
       "contracts": 5.41,
       "entry_date": "2026-07-22",
-      "status": "open",
-      "result": null,
-      "realized_pnl": null
+      "status": "resolved",
+      "result": "no",
+      "realized_pnl": -1.0,
+      "resolved_date": "2026-07-31"
     },
     {
       "ticker": "KXTSLAA-28JANHEAD-145000",
@@ -1032,9 +1038,10 @@
       "stake": 1.0,
       "contracts": 4.88,
       "entry_date": "2026-07-22",
-      "status": "open",
-      "result": null,
-      "realized_pnl": null
+      "status": "resolved",
+      "result": "yes",
+      "realized_pnl": -1.0,
+      "resolved_date": "2026-07-31"
     },
     {
       "ticker": "KXLOW-26AUGTXN-220000000",
@@ -1397,9 +1404,10 @@
       "stake": 1.0,
       "contracts": 5.71,
       "entry_date": "2026-07-23",
-      "status": "open",
-      "result": null,
-      "realized_pnl": null
+      "status": "resolved",
+      "result": "yes",
+      "realized_pnl": -1.0,
+      "resolved_date": "2026-07-31"
     },
     {
       "ticker": "KXFUTU-26AUGFUNDED-3850000.0",
@@ -1893,9 +1901,10 @@
       "stake": 1.0,
       "contracts": 1.9,
       "entry_date": "2026-07-23",
-      "status": "open",
-      "result": null,
-      "realized_pnl": null
+      "status": "resolved",
+      "result": "yes",
+      "realized_pnl": 0.9,
+      "resolved_date": "2026-07-31"
     },
     {
       "ticker": "KXSTZA-28JULBEER-415000000",
@@ -2183,5 +2192,5 @@
       "realized_pnl": null
     }
   ],
-  "marked_at": "2026-07-30T13:01:13+00:00"
+  "marked_at": "2026-07-31T13:51:45+00:00"
 }
