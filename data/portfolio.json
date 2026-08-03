@@ -1805,9 +1805,10 @@
       "stake": 1.0,
       "contracts": 2.0,
       "entry_date": "2026-07-23",
-      "status": "open",
-      "result": null,
-      "realized_pnl": null
+      "status": "resolved",
+      "result": "no",
+      "realized_pnl": 1.0,
+      "resolved_date": "2026-08-03"
     },
     {
       "ticker": "KXUAL-26OCTPAX-49750000.0",
@@ -2192,5 +2193,5 @@
       "realized_pnl": null
     }
   ],
-  "marked_at": "2026-08-02T13:08:08+00:00"
+  "marked_at": "2026-08-03T15:53:07+00:00"
 }
