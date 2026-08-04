@@ -518,9 +518,10 @@
       "stake": 1.0,
       "contracts": 6.25,
       "entry_date": "2026-07-22",
-      "status": "open",
-      "result": null,
-      "realized_pnl": null
+      "status": "resolved",
+      "result": "no",
+      "realized_pnl": 5.25,
+      "resolved_date": "2026-08-04"
     },
     {
       "ticker": "KXNCLH-26JULPAX-840000",
@@ -826,9 +827,10 @@
       "stake": 1.0,
       "contracts": 1.71,
       "entry_date": "2026-07-22",
-      "status": "open",
-      "result": null,
-      "realized_pnl": null
+      "status": "resolved",
+      "result": "yes",
+      "realized_pnl": 0.71,
+      "resolved_date": "2026-08-04"
     },
     {
       "ticker": "KXCMGA-28JANRESTS-4400",
@@ -1443,9 +1445,10 @@
       "stake": 1.0,
       "contracts": 4.88,
       "entry_date": "2026-07-23",
-      "status": "open",
-      "result": null,
-      "realized_pnl": null
+      "status": "resolved",
+      "result": "yes",
+      "realized_pnl": -1.0,
+      "resolved_date": "2026-08-04"
     },
     {
       "ticker": "KXMAR-26AUGROOMS-1820000.0",
@@ -1462,9 +1465,10 @@
       "stake": 1.0,
       "contracts": 1.32,
       "entry_date": "2026-07-23",
-      "status": "open",
-      "result": null,
-      "realized_pnl": null
+      "status": "resolved",
+      "result": "no",
+      "realized_pnl": 0.32,
+      "resolved_date": "2026-08-04"
     },
     {
       "ticker": "KXBULL-26AUGFUNDED-5250000.0",
@@ -2193,5 +2197,5 @@
       "realized_pnl": null
     }
   ],
-  "marked_at": "2026-08-03T15:53:07+00:00"
+  "marked_at": "2026-08-04T14:05:22+00:00"
 }
