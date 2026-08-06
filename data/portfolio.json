@@ -58,9 +58,10 @@
       "stake": 1.0,
       "contracts": 4.26,
       "entry_date": "2026-07-22",
-      "status": "open",
-      "result": null,
-      "realized_pnl": null
+      "status": "resolved",
+      "result": "yes",
+      "realized_pnl": -1.0,
+      "resolved_date": "2026-08-06"
     },
     {
       "ticker": "KXSBUXA-28JANSTORES-41500",
@@ -211,9 +212,10 @@
       "stake": 1.0,
       "contracts": 2.99,
       "entry_date": "2026-07-22",
-      "status": "open",
-      "result": null,
-      "realized_pnl": null
+      "status": "resolved",
+      "result": "no",
+      "realized_pnl": -1.0,
+      "resolved_date": "2026-08-06"
     },
     {
       "ticker": "KXCAVA-26AUGREST-476",
@@ -307,9 +309,10 @@
       "stake": 1.0,
       "contracts": 7.14,
       "entry_date": "2026-07-22",
-      "status": "open",
-      "result": null,
-      "realized_pnl": null
+      "status": "resolved",
+      "result": "yes",
+      "realized_pnl": -1.0,
+      "resolved_date": "2026-08-06"
     },
     {
       "ticker": "KXGOOG-26OCTHEAD-197000",
@@ -442,9 +445,10 @@
       "stake": 1.0,
       "contracts": 3.64,
       "entry_date": "2026-07-22",
-      "status": "open",
-      "result": null,
-      "realized_pnl": null
+      "status": "resolved",
+      "result": "no",
+      "realized_pnl": -1.0,
+      "resolved_date": "2026-08-06"
     },
     {
       "ticker": "KXYOUA-28JANMEM-8900000.0",
@@ -2375,5 +2379,5 @@
       "realized_pnl": null
     }
   ],
-  "marked_at": "2026-08-05T15:16:24+00:00"
+  "marked_at": "2026-08-06T14:48:06+00:00"
 }
