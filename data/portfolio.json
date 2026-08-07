@@ -677,9 +677,10 @@
       "stake": 1.0,
       "contracts": 4.0,
       "entry_date": "2026-07-22",
-      "status": "open",
-      "result": null,
-      "realized_pnl": null
+      "status": "resolved",
+      "result": "no",
+      "realized_pnl": 3.0,
+      "resolved_date": "2026-08-07"
     },
     {
       "ticker": "KXCVNA-26JULSALES-P200000",
@@ -716,9 +717,10 @@
       "stake": 1.0,
       "contracts": 2.67,
       "entry_date": "2026-07-22",
-      "status": "open",
-      "result": null,
-      "realized_pnl": null
+      "status": "resolved",
+      "result": "yes",
+      "realized_pnl": -1.0,
+      "resolved_date": "2026-08-07"
     },
     {
       "ticker": "KXLUV-26JULFARE-228",
@@ -1183,9 +1185,10 @@
       "stake": 1.0,
       "contracts": 8.33,
       "entry_date": "2026-07-22",
-      "status": "open",
-      "result": null,
-      "realized_pnl": null
+      "status": "resolved",
+      "result": "yes",
+      "realized_pnl": -1.0,
+      "resolved_date": "2026-08-07"
     },
     {
       "ticker": "KXPMA-28JANZYN-740000000",
@@ -1551,9 +1554,10 @@
       "stake": 1.0,
       "contracts": 7.41,
       "entry_date": "2026-07-23",
-      "status": "open",
-      "result": null,
-      "realized_pnl": null
+      "status": "resolved",
+      "result": "yes",
+      "realized_pnl": -1.0,
+      "resolved_date": "2026-08-07"
     },
     {
       "ticker": "KXMETAA-28JANDAP-3760000000.0",
@@ -1628,9 +1632,10 @@
       "stake": 1.0,
       "contracts": 1.55,
       "entry_date": "2026-07-23",
-      "status": "open",
-      "result": null,
-      "realized_pnl": null
+      "status": "resolved",
+      "result": "yes",
+      "realized_pnl": 0.55,
+      "resolved_date": "2026-08-07"
     },
     {
       "ticker": "KXRIVN-26OCTDELIV-17500",
@@ -2379,5 +2384,5 @@
       "realized_pnl": null
     }
   ],
-  "marked_at": "2026-08-06T14:48:06+00:00"
+  "marked_at": "2026-08-07T15:04:08+00:00"
 }
